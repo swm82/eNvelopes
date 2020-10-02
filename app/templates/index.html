@@ -6,33 +6,25 @@
 
 {% block page_content %}
 {% if current_user.is_authenticated %}
-<div class="container">
-    <div class="page-header">
-        <h1>Hello</h1>
+<div class="container-fluid padding">
+    <div class="page-header text-center">
+        <h1>Budget</h1>
     </div>
 
-    <div class="row">
-    {% for category in categories %}
-
-    <div class="col-sm-6 col-lg-4">
-        <div class="card" style="max-width: 18rem;">
-          <div class="card-header bg-behance content-center">
-            <i class="fab fa-behance icon text-white my-4 display-4"></i>
-          </div>
-          <div class="card-body row text-center">
-            <div class="col">
-              <div class="text-value-xl">89k</div>
-              <div class="text-uppercase text-muted small">friends</div>
-            </div>
-            <div class="vr"></div>
-            <div class="col">
-              <div class="text-value-xl">459</div>
-              <div class="text-uppercase text-muted small">feeds</div>
+    <div clas="container-fluid padding">
+      <div class="row padding">
+      {% for category in categories %}
+        <div class="col-md-3">
+          <div class="card border-primary mb-3 text-center">
+            <img class="card-img-top" src="{{ url_for('static', filename = 'envelope.jpg') }}">
+            <div class="card-body">
+              <h4 class="card-title">{{ category.name }}</h4>
+              <p class="card-text">STUFF</p>
             </div>
           </div>
         </div>
-      </div> 
       {% endfor %}
+      </div>
     </div>
     
 </div>
