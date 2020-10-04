@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+    Transactions
+{% endblock %}
+
+{% block page_content %}
+{% if current_user.is_authenticated %}
+<div class="container-fluid padding">
+    <div class="page-header text-center">
+        <h1>Transactions</h1>
+    </div>
+
+    <div clas="container-fluid padding">
+      <div class="row padding">
+        <table class = "table">
+            <thead>
+                <tr>
+                    <th scope="col">Payee</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <!-- <th scope="row">1</th> -->
+                    <td>{{ transaction.payee }}</td>
+                    <td>{{ transaction.category }}</td>
+                    <td>{{ transaction.amount }}</td>
+                    <td>{{ transaction.time }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <!-- <th scope="row">New Transaction</th> -->
+                    <td>{{ wtf.quick_form(form, form_type="inline") }}</td>
+                </tr>
+            
+            </tbody>
+        </table>
+      </div>
+    </div>
+    
+</div>
+{% else %}
+<h1>TODO: Redirect to register</h1>
+{% endif %}
+{% endblock %}
