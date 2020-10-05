@@ -21,6 +21,7 @@
 <div class="container-fluid padding">
     <div class="page-header text-center">
         <h1>Budget</h1>
+        <h4>Unbudgeted Amount: {{ user_cash }}</h4>
     </div>
 
     <div clas="container-fluid padding">
@@ -31,7 +32,7 @@
             <img class="card-img-top" src="{{ url_for('static', filename = 'envelope.jpg') }}">
             <div class="card-body">
               <h4 class="card-title">{{ category.name }}</h4>
-              <p class="card-text">STUFF</p>
+              <p class="card-text">{{ category.amount }}</p>
             </div>
           </div>
         </div>

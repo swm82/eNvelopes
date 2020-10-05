@@ -21,9 +21,9 @@ def index():
             return redirect(url_for('auth.register'))
         else:
             user = current_user.get_id()
-            userInfo = User.query.filter_by(id=user).first()
+            user_data = User.query.filter_by(id=user).first()
             categories = Category.query.filter_by(user_id=user).all()
-            return render_template("index.html", categories=categories, form=form)
+            return render_template("index.html", categories=categories, user_cash=user_data.cash, form=form)
 
 # add login required
 @main.route('/transactions', methods=['GET', 'POST'])
@@ -35,25 +35,34 @@ def transactions():
     form.category.choices = [category.name for category in categories]
     if request.method == 'POST':
         if form.validate_on_submit():
-            category = form.category.data
-            amount = form.amount.data
-            print(current_user.get_id())
-            q = Category.query.join(User).filter_by(id=current_user.get_id()).first()
-            print(q.id)
+            transaction_amount = form.amount.data
+            # Get category from db
+            transaction_category = Category.query.filter_by(name=form.category.data).join(User).filter_by(id=current_user.get_id()).first()
             #TODO Transaction must apply amount changes to total money, category amount
-            #TODO filter the payee query by payee (query payee joined with user to match) - filter the payee match
             payee = Payee.query.filter_by(name=form.payee.data).join(User).filter_by(id = current_user.get_id()).first()
-            print(payee)
+            # Check if payee exists for user, if not, create new payee with input name for user
             if payee is None:
                 payee = Payee(name=form.payee.data, user_id=current_user.get_id())
                 db.session.add(payee)
-                db.session.commit
-                print("here")
-            else:
-                payee = Payee.query.join(User).filter_by
-            transaction = Transaction(user_id=current_user.get_id(), payee=payee, category_id=q.id, amount=amount)
+                db.session.commit()
+            # Get payee ID from db, create new transaction associated with user, payee, category
+            payee = Payee.query.filter_by(name=form.payee.data).join(User).filter_by(id = current_user.get_id()).first()
+            transaction = Transaction(user_id=current_user.get_id(), payee_id=payee.id, category_id=transaction_category.id, amount=transaction_amount)
             db.session.add(transaction)
-            db.session.commit
-        return render_template("transactions.html", form=form)
+            db.session.commit()
+            transactions = Transaction.query.all()
+            # Update user's cash
+            user_data = User.query.filter_by(id=current_user.get_id()).first()
+            user_data.cash = user_data.cash - transaction_amount
+            db.session.commit()
+            # Update category amount
+            transaction_category.amount = transaction_category.amount - transaction_amount
+            db.session.commit()
+            print(transaction_category.amount)
+
+            return redirect(url_for('main.transactions'))
     else:
-        return render_template("transactions.html", form=form)
+        # If Get request, get current transactions, send to Jinja for formatting.  Add line for new transaction
+        # TODO - sort in reverse by date, place new transaction at top
+        transactions = Transaction.query.join(User).filter_by(id=current_user.get_id()).all()
+        return render_template("transactions.html", form=form, transactions=transactions)

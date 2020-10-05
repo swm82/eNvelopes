@@ -27,10 +27,9 @@
                 {% for transaction in transactions %}
                 <tr>
                     <!-- <th scope="row">1</th> -->
-                    <td>{{ transaction.payee }}</td>
-                    <td>{{ transaction.category }}</td>
+                    <td>{{ transaction.payee_id }}</td>
+                    <td>{{ transaction.category_id }}</td>
                     <td>{{ transaction.amount }}</td>
-                    <td>{{ transaction.time }}</td>
                 </tr>
                 {% endfor %}
                 <tr>
