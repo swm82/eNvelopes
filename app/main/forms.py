@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DecimalField, SubmitField, SelectField
+from wtforms import StringField, DecimalField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
 from wtforms import ValidationError
 from .. models import Category
@@ -16,5 +16,6 @@ class AddTransactionForm(FlaskForm):
     submit = SubmitField('Add Transaction')
 
 class AddToCategoryForm(FlaskForm):
-    amount = DecimalField(validators=[DataRequired()], places=2, rounding=None, use_locale=false, number_format=None)
+    amount = DecimalField(validators=[DataRequired()], places=2, rounding=None, use_locale=False, number_format=None)
+    category_id = HiddenField()
     submit = SubmitField('Add to Envelope')

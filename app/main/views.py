@@ -3,19 +3,29 @@ from flask import Flask, render_template, session, redirect, url_for, request
 from flask_login import current_user
 from . import main
 from .. import db
-from .forms import AddCategoryForm, AddTransactionForm
+from .forms import AddCategoryForm, AddTransactionForm, AddToCategoryForm
 from ..models import User, Category, Transaction, Payee
 from sqlalchemy import func
 
 @main.route('/', methods = ['POST', 'GET'])
 def index():
-    form = AddCategoryForm()
+    add_category_form = AddCategoryForm()
+    add_to_category_form = AddToCategoryForm()
     if request.method == 'POST':
         user = current_user.get_id()
-        if form.validate_on_submit():
-            category = Category(name=form.category_name.data, amount=0, user_id=current_user.get_id())
+        # If post request is from add_category form, add category to db
+        if request.form.get('submit') == 'add_category' and add_category_form.validate_on_submit():
+            category = Category(name=add_category_form.category_name.data, amount=0, user_id=current_user.get_id())
             db.session.add(category)
             db.session.commit()
+            return redirect(url_for('main.index'))
+        # If post request is from add_to_category adjust amount in category in db
+        if request.form.get('submit') == 'add_to_category' and add_to_category_form.validate_on_submit():
+            category = Category.query.filter_by(id=add_to_category_form.category_id.data).first()
+            category.amount = category.amount + add_to_category_form.amount.data
+            db.session.commit()
+            # TODO add remove cash option
+            # add delete category option
             return redirect(url_for('main.index'))
     else:
         if not current_user.is_authenticated:
@@ -25,15 +35,7 @@ def index():
             user_data = User.query.filter_by(id=user).first()
             categories = Category.query.filter_by(user_id=user).all()
             categorized_cash_total = db.session.query(func.sum(Category.amount)).filter_by(user_id=user).scalar()
-            print(categorized_cash_total)
-            return render_template("index.html", categories=categories, unbudgeted_amount=user_data.cash-categorized_cash_total, form=form)
-
-@main.route('/addCategory', methods=['POST']):
-def add_to_category():
-
-@main.route('/addCashToCategory', methods=['POST']):
-def add_to_category():
-
+            return render_template("index.html", categories=categories, unbudgeted_amount=user_data.cash-categorized_cash_total, add_category_form=add_category_form, add_to_category_form=add_to_category_form)
 
 # add login required
 @main.route('/transactions', methods=['GET', 'POST'])
