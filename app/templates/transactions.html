@@ -1,6 +1,15 @@
 {% extends "layout.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
+{% block styles %}
+    {{ super() }} 
+    <style>
+        .control-label {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
 {% block title %}
     Transactions
 {% endblock %}
@@ -17,25 +26,50 @@
         <table class = "table">
             <thead>
                 <tr>
-                    <th scope="col">Payee</th>
                     <th scope="col">Category</th>
+                    <th scope="col">Payee</th>
                     <th scope="col">Amount</th>
+                    <th scope="col">Inflow/Outflow</th>
                     <th scope="col">Time</th>
+                    <th scope="col">Delete</th>
                 </tr>
             </thead>
             <tbody>
+                <tr>
+                    <form action="" method="post" class="form" role="form">
+                        {{ form.csrf_token() }}
+                        <td>{{ wtf.form_field(form.category) }}</td>
+                        <td>{{ wtf.form_field(form.payee) }}</td>
+                        <td>{{ wtf.form_field(form.amount) }}</td>
+                        <td>TODO</td>
+                        <td>TODO</td>
+                        <td><button type="submit" class="btn btn-primary">Add Transaction</button></td>
+                    </form>
+                    <!-- <th scope="row">New Transaction</th> -->
+                    <!-- <td>{{ wtf.quick_form(form, form_type="inline") }}</td> -->
+                    <!-- <td>{{ wtf.form_field(form.category) }}</td>
+                    <td>{{ wtf.form_field(form.payee) }}</td>
+                    <td>{{ wtf.form_field(form.amount) }}</td>
+                    <td>TODO</td>
+                    <td>TODO</td>
+                    <td>{{ wtf.form_field(form.submit, class='btn btn-primary') }}</td> -->
+                </tr>
                 {% for transaction in transactions %}
                 <tr>
                     <!-- <th scope="row">1</th> -->
+                    <td>{{ category_names[transaction.category_id - 1] }}</td>
                     <td>{{ transaction.payee_id }}</td>
-                    <td>{{ transaction.category_id }}</td>
                     <td>{{ transaction.amount }}</td>
+                    {% if transaction.amount < 0 %}
+                        <td style="color: red">Inflow</td>
+                    {% else %}
+                        <td style="color: green">Outflow</td>
+                    {% endif %}
+                    <td>{{ transaction.timestamp }}</td>
+                    <td><button type="button" class="btn btn-danger">Delete(TODO)</button>
+                    </td>
                 </tr>
                 {% endfor %}
-                <tr>
-                    <!-- <th scope="row">New Transaction</th> -->
-                    <td>{{ wtf.quick_form(form, form_type="inline") }}</td>
-                </tr>
             
             </tbody>
         </table>

@@ -5,6 +5,7 @@ from . import main
 from .. import db
 from .forms import AddCategoryForm, AddTransactionForm
 from ..models import User, Category, Transaction, Payee
+from sqlalchemy import func
 
 @main.route('/', methods = ['POST', 'GET'])
 def index():
@@ -23,16 +24,25 @@ def index():
             user = current_user.get_id()
             user_data = User.query.filter_by(id=user).first()
             categories = Category.query.filter_by(user_id=user).all()
-            return render_template("index.html", categories=categories, user_cash=user_data.cash, form=form)
+            categorized_cash_total = db.session.query(func.sum(Category.amount)).filter_by(user_id=user).scalar()
+            print(categorized_cash_total)
+            return render_template("index.html", categories=categories, unbudgeted_amount=user_data.cash-categorized_cash_total, form=form)
+
+@main.route('/addCategory', methods=['POST']):
+def add_to_category():
+
+@main.route('/addCashToCategory', methods=['POST']):
+def add_to_category():
+
 
 # add login required
 @main.route('/transactions', methods=['GET', 'POST'])
 def transactions():
     form = AddTransactionForm()
-    # Get categories associated with user, pass to form select field
+    # Get categories associated with user, pass to form select field, get list of names to utilize in transaction list
     categories = Category.query.filter_by(user_id=current_user.get_id()).all()
-    # TODO: optimize so the category name holds/hides the id of the category for quick update?
-    form.category.choices = [category.name for category in categories]
+    user_category_names = [category.name for category in categories]
+    form.category.choices = user_category_names
     if request.method == 'POST':
         if form.validate_on_submit():
             transaction_amount = form.amount.data
@@ -58,11 +68,9 @@ def transactions():
             # Update category amount
             transaction_category.amount = transaction_category.amount - transaction_amount
             db.session.commit()
-            print(transaction_category.amount)
-
             return redirect(url_for('main.transactions'))
     else:
         # If Get request, get current transactions, send to Jinja for formatting.  Add line for new transaction
         # TODO - sort in reverse by date, place new transaction at top
         transactions = Transaction.query.join(User).filter_by(id=current_user.get_id()).all()
-        return render_template("transactions.html", form=form, transactions=transactions)
+        return render_template("transactions.html", form=form, transactions=transactions, category_names=user_category_names)

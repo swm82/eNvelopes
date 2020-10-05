@@ -10,7 +10,11 @@ class AddCategoryForm(FlaskForm):
 
 class AddTransactionForm(FlaskForm):
     # Implement category as dropdown of category options
-    category = SelectField('Category Name:', validators=[DataRequired()])
-    payee = StringField('Category Name:', validators=[DataRequired(), Length(1,64)])
+    category = SelectField(validators=[DataRequired()])
+    payee = StringField(validators=[DataRequired(), Length(1,64)])
     amount = DecimalField(validators=[DataRequired()], places=2, rounding=None, use_locale=False, number_format=None)
     submit = SubmitField('Add Transaction')
+
+class AddToCategoryForm(FlaskForm):
+    amount = DecimalField(validators=[DataRequired()], places=2, rounding=None, use_locale=false, number_format=None)
+    submit = SubmitField('Add to Envelope')

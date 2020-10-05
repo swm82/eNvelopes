@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import config
 from flask_login import LoginManager
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, func
 
 # Allows naming constraints to smooth db migrations
 convention = {
