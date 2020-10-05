@@ -79,6 +79,9 @@ class Payee(db.Model):
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
+    # TODO - add user_id, maybe look at how transaction field relates to Transaction table???
+    # a payee will have many transasactions i think this might be okay
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     transactions = db.relationship('Transaction', backref='payee')
 
     def __repr__(self):
