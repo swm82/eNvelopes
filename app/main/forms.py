@@ -19,3 +19,9 @@ class AddToCategoryForm(FlaskForm):
     amount = DecimalField(validators=[DataRequired()], places=2, rounding=None, use_locale=False, number_format=None)
     category_id = HiddenField()
     submit = SubmitField('Add to Envelope')
+
+class DeleteTransactionForm(FlaskForm):
+    transaction_id = HiddenField()
+    category_id = HiddenField()
+    transaction_amount = HiddenField()
+    delete = SubmitField('Delete Transaction')
