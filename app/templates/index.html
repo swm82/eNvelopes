@@ -41,8 +41,10 @@
                   {{ add_to_category_form.csrf_token() }}
                   <!-- Hidden field to store category ID -->
                   {{ add_to_category_form.category_id(value=category.id) }}
-                  <td>{{ wtf.form_field(add_to_category_form.amount) }}</td>
+                  {{ wtf.form_field(add_to_category_form.amount) }}
+                  {{ wtf.form_field(add_to_category_form.to_categories) }}
                   <button type="submit" name="submit" class="btn btn-primary" value="add_to_category">Add Cash</button>
+                  <button type="submit" name="submit" class="btn btn-danger" value="delete_transaction">Delete Category</button>
               </form>
             </div>
           </div>

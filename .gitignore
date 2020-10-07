@@ -2,6 +2,7 @@
 data.sqlite
 data-dev.sqlite
 Workspaces
+migrations
 .vscode
 
 # Byte-compiled / optimized / DLL files

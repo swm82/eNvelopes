@@ -35,6 +35,8 @@ def index():
             user_data = User.query.filter_by(id=user).first()
             categories = Category.query.filter_by(user_id=user).all()
             categorized_cash_total = db.session.query(func.sum(Category.amount)).filter_by(user_id=user).scalar()
+            if not categorized_cash_total:
+                categorized_cash_total = 0
             return render_template("index.html", categories=categories, unbudgeted_amount=user_data.cash-categorized_cash_total, add_category_form=add_category_form, add_to_category_form=add_to_category_form)
 
 # add login required
