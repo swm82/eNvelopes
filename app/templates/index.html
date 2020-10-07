@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/form.html" as wtf %}
 
 {% block styles %}
   {{ super()}}
@@ -10,8 +10,9 @@
       object-fit: cover;
     }
     .control-label {
-            display: none;
-        } 
+      visibility: hidden;
+    }
+     
   </style>
 {% endblock %}
 
@@ -21,17 +22,23 @@
 
 {% block page_content %}
 {% if current_user.is_authenticated %}
-<div class="container-fluid padding">
-    <div class="page-header text-center">
+<div class="container-fluid padding border-primary">
+    <div class="jumbotron jumbotron-fluid">
+      <div class="container">
+        <h1 class="display-4 text-center">Budget</h1>
+        <p class="lead text-center">Unbudgeted Amount: {{ format(unbudgeted_amount) }}</p>
+      </div>
+    </div>
+    <!-- <div class="page-header text-center">
         <h1>Budget</h1>
         <h4>Unbudgeted Amount: {{ format(unbudgeted_amount) }}</h4>
-    </div>
+    </div> -->
 
       <div clas="container-fluid padding">
         <div class="row padding">
         {% for category in categories %}
-          <div class="col-md-3 col-sm-6">
-            <div class="card border-primary mb-3 text-center">
+          <div class="col-md-4 col-sm-6">
+            <div class="card border-secondary mb-3 text-center">
               <img class="card-img-top" src="{{ url_for('static', filename = 'envelope.jpg') }}">
               <div class="card-body">
                 <h4 class="card-title" name="{{ category.id }}">{{ category.name }}</h4>
@@ -41,19 +48,23 @@
                     {{ add_to_category_form.csrf_token() }}
                     <!-- Hidden field to store category ID -->
                     {{ add_to_category_form.category_id(value=category.category_id) }}
-                    {{ wtf.form_field(add_to_category_form.amount) }}
+                    {{ wtf.render_field(add_to_category_form.amount) }}
                     <div class="form-group col-md-6 col-sm-6">
-                      <button type="submit" name="submit" class="btn btn-primary" value="add_to_category">Add Cash</button>
-                    </div>
-                    <div class="form-group col-md-6">
-                      <button type="submit" name="submit" class="btn btn-danger" value="delete_category">Delete</button>
+                      {{ add_to_category_form.submit(class_="btn btn-primary") }}
                     </div>
                 </form>
+                  <form action="" method="post" class="form" role="form">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6">
+                      {{ delete_category_form.csrf_token() }}
+                      {{ delete_category_form.category_id(value=category.category_id) }}
+                      {{ delete_category_form.delete(class_="btn btn-danger") }}
+                    </div>
+                  </form>
               </div>
             </div>
           </div>
         {% endfor %}
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-6">
           <div class="card border-primary mb-3 text-center">
             <img class="card-img-top" src="{{ url_for('static', filename = 'envelope.jpg') }}">
             <div class="card-body">
@@ -61,8 +72,8 @@
               <p class="card-text">
                 <form action="" method="post" class="form" role="form">
                   {{ add_category_form.csrf_token() }}
-                  <td>{{ wtf.form_field(add_category_form.category_name) }}</td>
-                  <button type="submit" name="submit" class="btn btn-primary" value="add_category">Add Category</button>
+                  <td>{{ wtf.render_field(add_category_form.category_name) }}</td>
+                  {{ add_category_form.submit(class_="btn btn-primary") }}
               </form>
               </p>
             </div>

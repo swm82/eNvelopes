@@ -21,10 +21,14 @@ class AddToCategoryForm(FlaskForm):
     # to_categories = SelectField('Move to category...')
     to_category_id = HiddenField()
     delete = SubmitField('Delete Category')
-    submit = SubmitField('Add to Envelope')
+    submit = SubmitField('Add')
 
 class DeleteTransactionForm(FlaskForm):
     transaction_id = HiddenField()
     category_id = HiddenField()
     transaction_amount = HiddenField()
     delete = SubmitField('Delete Transaction')
+
+class DeleteCategoryForm(FlaskForm):
+    category_id = HiddenField()
+    delete = SubmitField('Delete')

@@ -66,7 +66,7 @@ class Transaction(db.Model):
     inflow = db.Column(db.Boolean, default=False, nullable=False)
 
     def __repr__(self):
-        return'<Transaction %r>' %self.id
+        return'<Transaction %r>' %self.trans_id
 
 class Category(db.Model):
     __tablename__ = 'categories'

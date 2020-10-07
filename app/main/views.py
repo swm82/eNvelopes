@@ -3,7 +3,7 @@ from flask import Flask, render_template, session, redirect, url_for, request
 from flask_login import current_user
 from . import main
 from .. import db
-from .forms import AddCategoryForm, AddTransactionForm, AddToCategoryForm, DeleteTransactionForm
+from .forms import AddCategoryForm, AddTransactionForm, AddToCategoryForm, DeleteTransactionForm, DeleteCategoryForm
 from ..models import User, Category, Transaction, Payee
 from sqlalchemy import func
 
@@ -11,22 +11,29 @@ from sqlalchemy import func
 def index():
     add_category_form = AddCategoryForm()
     add_to_category_form = AddToCategoryForm()
+    delete_category_form = DeleteCategoryForm()
     if request.method == 'POST':
         user = current_user.get_id()
         # If post request is from add_category form, add category to db
-        if request.form['submit'] == 'add_category' and add_category_form.validate_on_submit():
-            print("Inside add cat")
+        if add_category_form.submit.data and add_category_form.validate_on_submit():
             category = Category(name=add_category_form.category_name.data, amount=0, user_id=current_user.get_id())
             db.session.add(category)
             db.session.commit()
         # If post request is from add_to_category adjust amount in category in db
-        if request.form['submit'] == 'add_to_category' and add_to_category_form.validate_on_submit():
-            print("Here")
+        if add_to_category_form.submit.data and add_to_category_form.validate_on_submit():
             category = Category.query.filter_by(category_id=add_to_category_form.category_id.data).first()
             category.amount = category.amount + decimal_to_int(add_to_category_form.amount.data)
             user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
             user_inflow.amount = user_inflow.amount - decimal_to_int(add_to_category_form.amount.data)
             db.session.commit()
+        if delete_category_form.delete.data and delete_category_form.validate_on_submit():
+            category = Category.query.filter_by(category_id=delete_category_form.category_id.data).first()
+            user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
+            user_inflow.amount = user_inflow.amount + category.amount
+            db.session.delete(category)
+            db.session.commit()
+
+
         return redirect(url_for('main.index'))
     else:
         if not current_user.is_authenticated:
@@ -37,7 +44,7 @@ def index():
             user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
             categories = Category.query.filter_by(user_id=user).filter(Category.name.isnot('Inflow')).all()
             unbudgeted = Category.query.filter_by(user_id=user, name="Inflow").first().amount
-            return render_template("index.html", categories=categories, unbudgeted_amount=unbudgeted, add_category_form=add_category_form, add_to_category_form=add_to_category_form)
+            return render_template("index.html", categories=categories, unbudgeted_amount=unbudgeted, add_category_form=add_category_form, add_to_category_form=add_to_category_form, delete_category_form=delete_category_form)
 
 # add login required
 @main.route('/transactions', methods=['GET', 'POST'])
@@ -76,12 +83,12 @@ def transactions():
             db.session.commit()
         if request.form.get('submit') == 'delete_transaction' and delete_transaction_form.validate_on_submit():
             # Find and delete transaction
-            transaction_to_delete = Transaction.query.filter_by(id=delete_transaction_form.transaction_id.data).first()
+            transaction_to_delete = Transaction.query.filter_by(trans_id=delete_transaction_form.transaction_id.data).first()
             # Get category entry and update amount
-            transaction_category = Category.query.filter_by(id=delete_transaction_form.category_id.data).first()
-            transaction_category.amount = transaction_category.amount + decimal_to_int(delete_transaction_form.transaction_amount.data)
+            transaction_category = Category.query.filter_by(category_id=delete_transaction_form.category_id.data).first()
+            transaction_category.amount = transaction_category.amount + transaction_to_delete.amount
             # Add cash back to user's total
-            user_data = User.query.filter_by(id=current_user.get_id()).first()
+            user_data = User.query.filter_by(user_id=current_user.get_id()).first()
             user_data.cash = user_data.cash + decimal_to_int(delete_transaction_form.transaction_amount.data)
             db.session.delete(transaction_to_delete)
             db.session.commit()

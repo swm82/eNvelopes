@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/form.html" as wtf %}
 
 {% block styles %}
     {{ super() }} 
@@ -38,9 +38,9 @@
                 <tr>
                     <form action="" method="post" class="form" role="form">
                         {{ add_transaction_form.csrf_token() }}
-                        <td>{{ wtf.form_field(add_transaction_form.category) }}</td>
-                        <td>{{ wtf.form_field(add_transaction_form.payee) }}</td>
-                        <td>{{ wtf.form_field(add_transaction_form.amount) }}</td>
+                        <td>{{ wtf.render_field(add_transaction_form.category) }}</td>
+                        <td>{{ wtf.render_field(add_transaction_form.payee) }}</td>
+                        <td>{{ wtf.render_field(add_transaction_form.amount) }}</td>
                         <td>TODO</td>
                         <td>TODO</td>
                         <td><button type="submit" name="submit" class="btn btn-primary" value="add_transaction">Add Transaction</button></td>
@@ -66,7 +66,7 @@
                         {% endif %}
                         <td>{{ transaction.timestamp }}</td>
                         <!-- Hidden field to store transaction id -->
-                        {{ delete_transaction_form.transaction_id(value=transaction.id) }}
+                        {{ delete_transaction_form.transaction_id(value=transaction.trans_id) }}
                         {{ delete_transaction_form.category_id(value=transaction.category_id) }}
                         {{ delete_transaction_form.transaction_amount(value=transaction.amount) }}
                         <td><button type="submit" name="submit" class="btn btn-danger" value="delete_transaction">Delete</button></td>
