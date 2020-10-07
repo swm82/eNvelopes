@@ -24,52 +24,55 @@
 <div class="container-fluid padding">
     <div class="page-header text-center">
         <h1>Budget</h1>
-        <h4>Unbudgeted Amount: {{ unbudgeted_amount }}</h4>
+        <h4>Unbudgeted Amount: {{ format(unbudgeted_amount) }}</h4>
     </div>
 
-    <div clas="container-fluid padding">
-      <div class="row padding">
-      {% for category in categories %}
+      <div clas="container-fluid padding">
+        <div class="row padding">
+        {% for category in categories %}
+          <div class="col-md-3 col-sm-6">
+            <div class="card border-primary mb-3 text-center">
+              <img class="card-img-top" src="{{ url_for('static', filename = 'envelope.jpg') }}">
+              <div class="card-body">
+                <h4 class="card-title" name="{{ category.id }}">{{ category.name }}</h4>
+                <p class="card-text">{{ format(category.amount) }}</p>
+                <p class="card-text">
+                  <form action="" method="post" class="form" role="form">
+                    {{ add_to_category_form.csrf_token() }}
+                    <!-- Hidden field to store category ID -->
+                    {{ add_to_category_form.category_id(value=category.category_id) }}
+                    {{ wtf.form_field(add_to_category_form.amount) }}
+                    <div class="form-group col-md-6 col-sm-6">
+                      <button type="submit" name="submit" class="btn btn-primary" value="add_to_category">Add Cash</button>
+                    </div>
+                    <div class="form-group col-md-6">
+                      <button type="submit" name="submit" class="btn btn-danger" value="delete_category">Delete</button>
+                    </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
         <div class="col-md-3">
           <div class="card border-primary mb-3 text-center">
             <img class="card-img-top" src="{{ url_for('static', filename = 'envelope.jpg') }}">
             <div class="card-body">
-              <h4 class="card-title" name="{{ category.id }}">{{ category.name }}</h4>
-              <p class="card-text">{{ category.amount }}</p>
+              <h4 class="card-title">Add Category</h4>
               <p class="card-text">
                 <form action="" method="post" class="form" role="form">
-                  {{ add_to_category_form.csrf_token() }}
-                  <!-- Hidden field to store category ID -->
-                  {{ add_to_category_form.category_id(value=category.id) }}
-                  {{ wtf.form_field(add_to_category_form.amount) }}
-                  {{ wtf.form_field(add_to_category_form.to_categories) }}
-                  <button type="submit" name="submit" class="btn btn-primary" value="add_to_category">Add Cash</button>
-                  <button type="submit" name="submit" class="btn btn-danger" value="delete_transaction">Delete Category</button>
+                  {{ add_category_form.csrf_token() }}
+                  <td>{{ wtf.form_field(add_category_form.category_name) }}</td>
+                  <button type="submit" name="submit" class="btn btn-primary" value="add_category">Add Category</button>
               </form>
+              </p>
             </div>
           </div>
         </div>
-      {% endfor %}
-      <div class="col-md-3">
-        <div class="card border-primary mb-3 text-center">
-          <img class="card-img-top" src="{{ url_for('static', filename = 'envelope.jpg') }}">
-          <div class="card-body">
-            <h4 class="card-title">Add Category</h4>
-            <p class="card-text">
-              <form action="" method="post" class="form" role="form">
-                {{ add_category_form.csrf_token() }}
-                <td>{{ wtf.form_field(add_category_form.category_name) }}</td>
-                <button type="submit" name="submit" class="btn btn-primary" value="add_category">Add Category</button>
-            </form>
-            </p>
-          </div>
         </div>
       </div>
-      </div>
-    </div>
-    
-</div>
-{% else %}
-<h1>TODO: Redirect to register</h1>
-{% endif %}
-{% endblock %}
+      
+  </div>
+  {% else %}
+  <h1>TODO: Redirect to register</h1>
+  {% endif %}
+  {% endblock %}

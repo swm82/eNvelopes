@@ -7,11 +7,15 @@ from config import config
 from flask_login import LoginManager
 from sqlalchemy import MetaData, func
 
+# Format currency function for jinja templates (Put this in import)
+def format_currency(value):
+    return "${:,.2f}".format(float(value)/100)
+
 # Allows naming constraints to smooth db migrations
 convention = {
     "ix": 'ix_%(column_0_label)s',
     "uq": "uq_%(table_name)s_%(column_0_name)s",
-    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "ck": "ck_%(table_name)s_%(column_0_name)s",
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
     "pk": "pk_%(table_name)s"
 }
@@ -36,6 +40,8 @@ def create_app(config_name):
     moment.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
+
+    app.jinja_env.globals.update(format=format_currency)
 
 
     from .main import main as main_blueprint

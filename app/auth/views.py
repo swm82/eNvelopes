@@ -1,7 +1,7 @@
 from flask import render_template, redirect, request, url_for, flash
 from flask_login import login_user, logout_user, login_required 
 from . import auth
-from ..models import User
+from ..models import User, Category
 from .forms import LoginForm, RegistrationForm
 from .. import db
 
@@ -32,6 +32,10 @@ def register():
     if form.validate_on_submit():
         user = User(email=form.email.data, username=form.username.data, password=form.password.data, role=2, cash=0)
         db.session.add(user)
+        db.session.commit()
+        user_info = User.query.filter_by(email=form.email.data).first()
+        inflow = Category(name='Inflow', amount=0, user_id=user_info.user_id)
+        db.session.add(inflow)
         db.session.commit()
         flash('You can now login')
         return redirect(url_for('auth.login'))

@@ -52,13 +52,17 @@
                         {{ delete_transaction_form.csrf_token() }}
                         <!-- Make sure to implement deletes in the db as delete category, else indexing will be impacted -->
                         <!-- Use a dictionary to cary category name/id association -->
-                        <td>{{ transaction.category_id }}</td>
+                        <td>{{ category_dict[transaction.category_id] }}</td>
                         <td>{{ transaction.payee_id }}</td>
-                        <td>{{ transaction.amount }}</td>
-                        {% if transaction.amount < 0 %}
-                            <td style="color: red">Inflow</td>
+                        {% if category_dict[transaction.category_id] == 'Inflow' %}
+                            <td>{{ format(transaction.amount * -1) }}</td>
                         {% else %}
-                            <td style="color: green">Outflow</td>
+                            <td>{{ format(transaction.amount) }}</td>
+                        {% endif %}
+                        {% if transaction.inflow == 1 %}
+                            <td style="color: green">Inflow</td>
+                        {% else %}
+                            <td style="color: red">Outflow</td>
                         {% endif %}
                         <td>{{ transaction.timestamp }}</td>
                         <!-- Hidden field to store transaction id -->
