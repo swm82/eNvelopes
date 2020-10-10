@@ -15,32 +15,59 @@
 {% block styles %}
     {{ super() }}
     <style>
-        
+        header {
+            padding: 10px;
+            background:darkgreen;
+            text-align: center;
+        }
+
+
+        footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: darkgreen;
+            color: white;
+            text-align: center;
+            font-size: small;
+        }
+
+        .navbar-brand {
+            color: #FFFFFF;
+        }
+
+        .navbar-nav .navbar-brand .active>.nav-link, .navbar-light .navbar-nav .nav-link.active, .navbar-light .navbar-nav .nav-link.show, .navbar-light .navbar-nav .show>.nav-link {
+            color: #FFFFFF;
+        }
+
+        .navbar-nav .navbar-brand .nav-link {
+            color: #FFFFFF;
+        }
+        .navbar-brand, .navbar-text, .nav-link {
+            color:white;
+        } 
+
+
+        .navbar-nav, .navbar-brand:focus, .navbar-brand:hover, .nav-link:focus, .navbar-nav, .nav-link:hover {
+            color: #ccc !important;
+        }
+
         .navbar {
-            min-height: 150px;
-            padding: 0;
-            /* display: inline-block; */
-            color: green;
+            background: darkgreen;
         }
         .navbar-brand {
-            /* padding: 0 15px; */
-            /* height: 150px; */
             font-family: 'Rubik', sans-serif;
-            font-size: 2.0em;
+            font-size: 1.5em;
             font-weight: 900;
         }
         .nav {
-            /* padding-top: 10px; */
             font-size: 1.0em;
             font-family: 'Rubik', sans-serif;
         }
 
-        .navbar-custom {
-            background-color:rgb(45, 145, 45);
-        }
-
-        .navbar-custom .navbar-brand, .navbar-text, .nav-link {
-            color:white;
+        .container {
+            font-family: 'Open Sans', sans-serif;
         }
     </style>
 {% endblock %}
@@ -49,9 +76,11 @@
 {% block title %}eNvelopes{% endblock %}
 
 {% block content %}
-    <nav class="navbar navbar-expand-lg navbar-custom">
+    <header>
+        <img src="{{ url_for('static', filename='logo.png') }}" height=100px>
+    </header>
+    <nav class="navbar-expand-sm navbar-expand-md navbar-expand-lg navbar">
         <div class="container-fluid">
-            <!-- <a class="navbar-brand" href="{{ url_for('main.index') }}"><img src="{{ url_for('static', filename='Envelopes.png') }}" alt="Brand" width="100" class="d-inline-block align-top"></a> -->
             <a class="navbar-brand" href="{{ url_for('main.index') }}">eNvelopes</a>
             <ul class="nav navbar-nav">
                 <li class="nav-item">
@@ -75,5 +104,8 @@
     <div class="container">
         {% block page_content %} {% endblock %}
     </div>
+    <footer>
+        © Seth McCann - 2020
+    </footer>
 {% endblock %}
 

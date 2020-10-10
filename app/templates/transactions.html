@@ -4,8 +4,16 @@
 {% block styles %}
     {{ super() }} 
     <style>
-        .control-label {
+        .form-control-label {
             display: none;
+        }
+
+        .page-header, .table {
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .page-header {
+            padding: 10px;
         }
     </style>
 {% endblock %}
@@ -23,7 +31,7 @@
 
     <div clas="container-fluid padding">
       <div class="row padding">
-        <table class = "table">
+        <table class="table">
             <thead>
                 <tr>
                     <th scope="col">Category</th>

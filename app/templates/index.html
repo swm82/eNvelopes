@@ -12,6 +12,23 @@
     .control-label {
       visibility: hidden;
     }
+    .jumbotron {
+      font-family: 'Open Sans', sans-serif;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    .delete-button {
+      padding: 5px;
+      float: right;
+      margin: 0;
+    }
+
+    .category-button {
+      padding: 5px;
+      float: left;
+      margin: 0;
+    }
      
   </style>
 {% endblock %}
@@ -22,11 +39,13 @@
 
 {% block page_content %}
 {% if current_user.is_authenticated %}
-<div class="container-fluid padding border-primary">
+<div class="container-fluid padding">
     <div class="jumbotron jumbotron-fluid">
       <div class="container">
         <h1 class="display-4 text-center">Budget</h1>
-        <p class="lead text-center">Unbudgeted Amount: {{ format(unbudgeted_amount) }}</p>
+        <hr class="my-4">
+        <p class="lead text-center">Unbudgeted Amount:</p>
+        <p class="lead text-center">{{ format(unbudgeted_amount) }}</p>
       </div>
     </div>
     <!-- <div class="page-header text-center">
@@ -49,12 +68,12 @@
                     <!-- Hidden field to store category ID -->
                     {{ add_to_category_form.category_id(value=category.category_id) }}
                     {{ wtf.render_field(add_to_category_form.amount) }}
-                    <div class="form-group col-md-6 col-sm-6">
+                    <div class="category-button">
                       {{ add_to_category_form.submit(class_="btn btn-primary") }}
                     </div>
                 </form>
                   <form action="" method="post" class="form" role="form">
-                    <div class="form-group col-lg-6 col-md-6 col-sm-6">
+                    <div class="delete-button">
                       {{ delete_category_form.csrf_token() }}
                       {{ delete_category_form.category_id(value=category.category_id) }}
                       {{ delete_category_form.delete(class_="btn btn-danger") }}
