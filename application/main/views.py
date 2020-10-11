@@ -54,6 +54,8 @@ def transactions():
     # Get categories associated with user, pass to form select field, get list of names to utilize in transaction list
     categories = Category.query.filter_by(user_id=current_user.get_id()).all()
     # Category dict to be used in template
+    payees = Payee.query.filter_by(user_id=current_user.get_id()).all()
+    payees = { payee.payee_id : payee.name for payee in payees }
     categories = { category.category_id : category.name for category in categories }
     add_transaction_form.category.choices = list(categories.values())
     if request.method == 'POST':
@@ -98,7 +100,7 @@ def transactions():
         # If Get request, get current transactions, send to Jinja for formatting.  Add line for new transaction
         # TODO - sort in reverse by date, place new transaction at top
         transactions = Transaction.query.join(User).filter_by(user_id=current_user.get_id()).all()
-        return render_template("transactions.html", add_transaction_form=add_transaction_form, delete_transaction_form=delete_transaction_form, transactions=transactions, category_dict=categories)
+        return render_template("transactions.html", add_transaction_form=add_transaction_form, delete_transaction_form=delete_transaction_form, transactions=transactions, category_dict=categories, payee_dict=payees)
 
 
 # Helper methods - move to seperate pkg

@@ -49,8 +49,8 @@
                         <td>{{ wtf.render_field(add_transaction_form.category) }}</td>
                         <td>{{ wtf.render_field(add_transaction_form.payee) }}</td>
                         <td>{{ wtf.render_field(add_transaction_form.amount) }}</td>
-                        <td>TODO</td>
-                        <td>TODO</td>
+                        <td></td>
+                        <td></td>
                         <td><button type="submit" name="submit" class="btn btn-primary" value="add_transaction">Add Transaction</button></td>
                     </form>
                 </tr>
@@ -58,10 +58,8 @@
                 <tr>
                     <form action="" method="post" class="form" role="form">
                         {{ delete_transaction_form.csrf_token() }}
-                        <!-- Make sure to implement deletes in the db as delete category, else indexing will be impacted -->
-                        <!-- Use a dictionary to cary category name/id association -->
                         <td>{{ category_dict[transaction.category_id] }}</td>
-                        <td>{{ transaction.payee_id }}</td>
+                        <td>{{ payee_dict[transaction.payee_id] }}</td>
                         {% if category_dict[transaction.category_id] == 'Inflow' %}
                             <td>{{ format(transaction.amount * -1) }}</td>
                         {% else %}
