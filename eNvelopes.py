@@ -1,6 +1,6 @@
 import os
-from app import create_app, db
-from app.models import User, Role, Transaction, Category, Payee
+from application import create_app, db
+from application.models import User, Role, Transaction, Category, Payee
 from flask_migrate import Migrate
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default') # uses configuration from env if set, else default used
