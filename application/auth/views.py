@@ -12,6 +12,7 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user is not None and user.verify_password(form.password.data): 
             login_user(user, form.remember_me.data) 
+            print(user)
             flash("logged in successfully as {}".format(user.username))
             next = request.args.get('next') 
             if next is None or not next.startswith('/'):

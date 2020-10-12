@@ -46,8 +46,8 @@ def index():
             unbudgeted = Category.query.filter_by(user_id=user, name="Inflow").first().amount
             return render_template("index.html", categories=categories, unbudgeted_amount=unbudgeted, add_category_form=add_category_form, add_to_category_form=add_to_category_form, delete_category_form=delete_category_form)
 
-# add login required
 @main.route('/transactions', methods=['GET', 'POST'])
+@login_required
 def transactions():
     add_transaction_form = AddTransactionForm()
     delete_transaction_form = DeleteTransactionForm()
