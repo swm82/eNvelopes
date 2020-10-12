@@ -8,10 +8,11 @@ from .. import db
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    if form.validate_on_submit(): # Checks that request is POST and if valid - combines is_submitted() and validate()
+    if form.validate_on_submit(): 
         user = User.query.filter_by(username=form.username.data).first()
         if user is not None and user.verify_password(form.password.data): 
-            login_user(user, form.remember_me.data) # returns true if success
+            login_user(user, form.remember_me.data) 
+            flash("logged in successfully as {}".format(user.username))
             next = request.args.get('next') 
             if next is None or not next.startswith('/'):
                 next = url_for('main.index')
