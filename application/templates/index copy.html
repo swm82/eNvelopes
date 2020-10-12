@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% import "bootstrap/form.html" as wtf %}
+
+{% block styles %}
+  {{ super()}}
+  <style>
+    .card-img-top {
+      width: 100%;
+      height: 15vw;
+      object-fit: cover;
+    }
+    .control-label {
+      visibility: hidden;
+    }
+    .jumbotron {
+      font-family: 'Open Sans', sans-serif;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    .delete-button {
+      padding: 5px;
+      float: right;
+      margin: 0;
+    }
+
+    .category-button {
+      padding: 5px;
+      float: left;
+      margin: 0;
+    }
+     
+  </style>
+{% endblock %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid padding">
+{% if current_user.is_authenticated %}
+{% else %}
+  <p></p>
+{% endif %}
+</div>
+{% endblock %}
