@@ -37,7 +37,7 @@ def index():
         return redirect(url_for('main.index'))
     else:
         if not current_user.is_authenticated:
-            return redirect(url_for('auth.register'))
+            return redirect(url_for('auth.login'))
         else:
             user = current_user.get_id()
             user_data = User.query.filter_by(user_id=user).first()
