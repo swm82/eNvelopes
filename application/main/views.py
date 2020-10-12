@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Flask, render_template, session, redirect, url_for, request
-from flask_login import current_user
+from flask_login import current_user, login_required
 from . import main
 from .. import db
 from .forms import AddCategoryForm, AddTransactionForm, AddToCategoryForm, DeleteTransactionForm, DeleteCategoryForm
