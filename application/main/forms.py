@@ -24,10 +24,15 @@ class AddTransactionForm(FlaskForm):
 class AddToCategoryForm(FlaskForm):
     amount = CurrencyField(validators=[DataRequired()], places=2, rounding=None, use_locale=False, number_format=None)
     category_id = HiddenField()
-    # to_categories = SelectField('Move to category...')
-    to_category_id = HiddenField()
     delete = SubmitField('Delete Category')
-    submit = SubmitField('Add')
+    submit = SubmitField('Add Cash')
+
+class MoveToCategoryForm(FlaskForm):
+    to_categories = SelectField('Move to category...')
+    to_category_id = HiddenField()
+    from_category_id = HiddenField()
+    amount = CurrencyField(validators=[DataRequired()], places=2, rounding=None, use_locale=False, number_format=None)
+    submit = SubmitField('Move Cash')
 
 class DeleteTransactionForm(FlaskForm):
     transaction_id = HiddenField()
@@ -37,4 +42,4 @@ class DeleteTransactionForm(FlaskForm):
 
 class DeleteCategoryForm(FlaskForm):
     category_id = HiddenField()
-    delete = SubmitField('Delete')
+    delete = SubmitField('Delete Category')

@@ -1,6 +1,24 @@
 {% extends "layout.html" %}
 {% import "bootstrap/form.html" as wtf %}
 
+  {% block scripts %}
+  <script>
+    const btn = document.querySelector('#toggle')
+    btn.addEventListener('click', () => {
+      var x = document.querySelector('#add-to-category-form');
+      var y = document.querySelector('#move-cash-form');
+      if (x.style.display === "none") {
+        x.style.display = "block";
+        y.style.display = "none";
+      } else {
+        x.style.display = "none";
+        y.style.display = "block";
+      }
+    });
+  </script>
+  {% endblock %}
+
+
 {% block styles %}
   {{ super()}}
   <style>
@@ -24,10 +42,14 @@
       margin: 0;
     }
 
-    .category-button {
+    .add-cash-button {
       padding: 5px;
       float: left;
       margin: 0;
+    }
+
+    #move-cash-form {
+      display: none;
     }
      
   </style>
@@ -48,11 +70,6 @@
         <p class="lead text-center">{{ format(unbudgeted_amount) }}</p>
       </div>
     </div>
-    <!-- <div class="page-header text-center">
-        <h1>Budget</h1>
-        <h4>Unbudgeted Amount: {{ format(unbudgeted_amount) }}</h4>
-    </div> -->
-
       <div clas="container-fluid padding">
         <div class="row padding">
         {% for category in categories %}
@@ -61,24 +78,36 @@
               <img class="card-img-top" src="{{ url_for('static', filename = 'envelope.jpg') }}">
               <div class="card-body">
                 <h4 class="card-title" name="{{ category.id }}">{{ category.name }}</h4>
-                <p class="card-text">{{ format(category.amount) }}</p>
                 <p class="card-text">
-                  <form action="" method="post" class="form" role="form">
-                    {{ add_to_category_form.csrf_token() }}
-                    <!-- Hidden field to store category ID -->
-                    {{ add_to_category_form.category_id(value=category.category_id) }}
-                    {{ wtf.render_field(add_to_category_form.amount) }}
-                    <div class="category-button">
-                      {{ add_to_category_form.submit(class_="btn btn-primary") }}
-                    </div>
-                </form>
-                  <form action="" method="post" class="form" role="form">
-                    <div class="delete-button">
-                      {{ delete_category_form.csrf_token() }}
-                      {{ delete_category_form.category_id(value=category.category_id) }}
-                      {{ delete_category_form.delete(class_="btn btn-danger") }}
-                    </div>
-                  </form>
+                  <button type="button" class="btn btn-default" id="toggle">{{ format(category.amount) }}</button>
+                </p>
+                <p class="card-text">
+                  <div id="add-to-category-form">
+                    <form action="" method="post" class="form" role="form">
+                      {{ add_to_category_form.csrf_token() }}
+                      <!-- Hidden field to store category ID -->
+                      {{ add_to_category_form.category_id(value=category.category_id) }}
+                      {{ wtf.render_field(add_to_category_form.amount) }}
+                      <div class="add-cash-button">
+                        {{ add_to_category_form.submit(class_="btn btn-primary") }}
+                      </div>
+                    </form>
+                    <form action="" method="post" class="form" role="form">
+                      <div class="delete-button">
+                        {{ delete_category_form.csrf_token() }}
+                        {{ delete_category_form.category_id(value=category.category_id) }}
+                        {{ delete_category_form.delete(class_="btn btn-danger") }}
+                      </div>
+                    </form>
+                  </div>
+                  <div id="move-cash-form">
+                    <form action="" method="post" class="form" role="form">
+                      {{ move_to_category_form.csrf_token() }}
+                      {{ move_to_category_form.from_category_id(value=category.category_id) }}
+                      {{ wtf.render_form(move_to_category_form) }}
+                    </form>
+                  </div>
+                  
               </div>
             </div>
           </div>
@@ -106,3 +135,7 @@
   <h1>TODO: Redirect to register</h1>
   {% endif %}
   {% endblock %}
+
+
+
+

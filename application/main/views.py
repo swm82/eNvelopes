@@ -3,7 +3,7 @@ from flask import Flask, render_template, session, redirect, url_for, request
 from flask_login import current_user, login_required
 from . import main
 from .. import db
-from .forms import AddCategoryForm, AddTransactionForm, AddToCategoryForm, DeleteTransactionForm, DeleteCategoryForm
+from .forms import AddCategoryForm, AddTransactionForm, AddToCategoryForm, DeleteTransactionForm, DeleteCategoryForm, MoveToCategoryForm
 from ..models import User, Category, Transaction, Payee
 from sqlalchemy import func
 
@@ -12,25 +12,36 @@ def index():
     add_category_form = AddCategoryForm()
     add_to_category_form = AddToCategoryForm()
     delete_category_form = DeleteCategoryForm()
+    move_to_category_form = MoveToCategoryForm()
+    user_categories = Category.query.filter_by(user_id=current_user.get_id()).all()
+    user_categories = { category.name : category.category_id for category in user_categories }
+    move_to_category_form.to_categories.choices = list(user_categories.keys())
     if request.method == 'POST':
+        print(request.form.get('to_categories'))
         user = current_user.get_id()
         # If post request is from add_category form, add category to db
-        if add_category_form.submit.data and add_category_form.validate_on_submit():
+        if request.form.get('submit') == "Add Category" and add_category_form.validate_on_submit():
             category = Category(name=add_category_form.category_name.data, amount=0, user_id=current_user.get_id())
             db.session.add(category)
             db.session.commit()
         # If post request is from add_to_category adjust amount in category in db
-        if add_to_category_form.submit.data and add_to_category_form.validate_on_submit():
+        if request.form.get('submit') == "Add Cash" and add_to_category_form.validate_on_submit():
             category = Category.query.filter_by(category_id=add_to_category_form.category_id.data).first()
             category.amount = category.amount + decimal_to_int(add_to_category_form.amount.data)
             user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
             user_inflow.amount = user_inflow.amount - decimal_to_int(add_to_category_form.amount.data)
             db.session.commit()
-        if delete_category_form.delete.data and delete_category_form.validate_on_submit():
+        if  request.form.get('delete') == "Delete Category" and delete_category_form.validate_on_submit():
             category = Category.query.filter_by(category_id=delete_category_form.category_id.data).first()
             user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
             user_inflow.amount = user_inflow.amount + category.amount
             db.session.delete(category)
+            db.session.commit()
+        if request.form.get('submit') == "Move Cash" and move_to_category_form.validate_on_submit():
+            to_category = Category.query.filter_by(category_id=user_categories[move_to_category_form.to_categories.data]).join(User).filter_by(user_id=current_user.get_id()).first()
+            to_category.amount = to_category.amount + decimal_to_int(move_to_category_form.amount.data)
+            from_category = Category.query.filter_by(category_id=move_to_category_form.from_category_id.data).first();
+            from_category.amount = from_category.amount - decimal_to_int(move_to_category_form.amount.data)
             db.session.commit()
 
 
@@ -44,7 +55,7 @@ def index():
             user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
             categories = Category.query.filter_by(user_id=user).filter(Category.name.isnot('Inflow')).all()
             unbudgeted = Category.query.filter_by(user_id=user, name="Inflow").first().amount
-            return render_template("index.html", categories=categories, unbudgeted_amount=unbudgeted, add_category_form=add_category_form, add_to_category_form=add_to_category_form, delete_category_form=delete_category_form)
+            return render_template("index.html", categories=categories, unbudgeted_amount=unbudgeted, add_category_form=add_category_form, add_to_category_form=add_to_category_form, delete_category_form=delete_category_form, move_to_category_form=move_to_category_form) 
 
 @main.route('/transactions', methods=['GET', 'POST'])
 @login_required
