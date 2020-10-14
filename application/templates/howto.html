@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% import "bootstrap/form.html" as wtf %}
+
+{% block styles %}
+  {{ super()}}
+  <style>
+    .howto-heading {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .howto {
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+    
+    .howto h3 {
+      color: darkgreen;
+    }
+  </style>
+{% endblock %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid padding">
+  <section class="howto-heading">
+    <h2><strong>How to Use the Envelope System</strong></h2>
+  </section>
+  <section class="howto">
+    <h3>Budgeting</h3>
+    <h4>You can only budget what you have...</h4>
+    <p>Every time you get paid (inflow), you divide your money into spending categories by placing cash into envelopes</p>
+
+    <h3>Spending</h3>
+    <h4>You can only spend what you have...</h4>
+    <p>When you make a purchase or pay bills, you take money from your envelope.  If you don't have enough money in the envelope,
+      think carefully about whether or not you need to make the purchase.  If you do, you're going to have to take money from another envelope.
+    </p>
+
+    <h3>Getting Started</h3>
+    <h4>Think about where you spend your money...</h4>
+    <p>Come up with a list of all of your bills and fixed expenses. Don't forget about your Spotify subscription.  List all of your regular spending: Groceries, gas, dining out, clothing, etc.  Don't forget to list some things you enjoy paying for: going to the movies, buying succulents.  These are your categories, and they each deserve an envelope.</p>
+    
+
+    <h3>Getting paid</h3>
+    <h4>Put the money into envelopes...</h4>
+    <p>ALL of it.  Move unbudgeted cash into envelopes.  Prioritize categories based on your needs.  Is rent due next week?  Your whole pay check might be going into the rent envelope.  Or do you get another paycheck before rent is due?  Put half of your rent in the envelope now.  
+      At first you'll need to make some educated guesses.  You will probably underestimate your spending in some categories, but you will quickly become more aware of where your money goes.  Remember: you are not planning for your financial future.  Deal with the money you have now.</p>
+
+
+  </section>
+</div>
+{% endblock %}

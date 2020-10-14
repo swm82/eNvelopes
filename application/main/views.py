@@ -113,6 +113,10 @@ def transactions():
         transactions = Transaction.query.join(User).filter_by(user_id=current_user.get_id()).all()
         return render_template("transactions.html", add_transaction_form=add_transaction_form, delete_transaction_form=delete_transaction_form, transactions=transactions, category_dict=categories, payee_dict=payees)
 
+@main.route('/howto')
+def howto():
+    return render_template("howto.html")
+
 
 # Helper methods - move to seperate pkg
 def decimal_to_int(value):
