@@ -2,7 +2,7 @@
 {% import "bootstrap/form.html" as wtf %}
 
   {% block scripts %}
-  super()
+  {{ super() }}
   <script>
   $(document).ready(function(){
     $(".toggle").on("click", function() {
@@ -24,7 +24,7 @@
 
 
 {% block styles %}
-  {{ super()}}
+  {{ super() }}
   <style>
     .card-img-top {
       width: 100%;
