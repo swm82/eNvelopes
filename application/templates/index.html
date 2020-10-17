@@ -2,19 +2,23 @@
 {% import "bootstrap/form.html" as wtf %}
 
   {% block scripts %}
+  super()
   <script>
-    const btn = document.querySelector('#toggle')
-    btn.addEventListener('click', () => {
-      var x = document.querySelector('#add-to-category-form');
-      var y = document.querySelector('#move-cash-form');
-      if (x.style.display === "none") {
-        x.style.display = "block";
-        y.style.display = "none";
+  $(document).ready(function(){
+    $(".toggle").on("click", function() {
+      const $moveCashForm = $(this).closest('.category').find('.move-cash');
+      const $addCashForm = $(this).closest('.category').find('.add-cash');
+      if ($moveCashForm.hasClass('hidden')) {
+        $moveCashForm.removeClass('hidden');
+        $addCashForm.addClass('hidden');
       } else {
-        x.style.display = "none";
-        y.style.display = "block";
+        $addCashForm.removeClass('hidden');
+        $moveCashForm.addClass('hidden');
       }
+      console.log($(this).closest('#category').find('#move-cash'));
+      
     });
+  });
   </script>
   {% endblock %}
 
@@ -48,7 +52,19 @@
       margin: 0;
     }
 
-    #move-cash-form {
+
+    .btn-default {
+      color: rgba(1, 16, 224, 0.75);
+      letter-spacing: 1px;
+      line-height: 15px;
+      border: 2px solid rgba(1, 16, 224, 0.75);
+      border-radius: 40px;
+      background: transparent;
+      transition: all 0.3s ease 0s;
+      margin-bottom: 10px;
+    }
+
+    .hidden {
       display: none;
     }
      
@@ -70,22 +86,18 @@
         <p class="lead text-center">{{ format(unbudgeted_amount) }}</p>
       </div>
     </div>
-      <div clas="container-fluid padding">
+      <div id="cards">
         <div class="row padding">
         {% for category in categories %}
           <div class="col-md-4 col-sm-6">
-            <div class="card border-secondary mb-3 text-center">
+            <div class="card border-secondary mb-3 text-center category">
               <img class="card-img-top" src="{{ url_for('static', filename = 'envelope.jpg') }}">
               <div class="card-body">
                 <h4 class="card-title" name="{{ category.id }}">{{ category.name }}</h4>
-                <p class="card-text">
-                  <button type="button" class="btn btn-default" id="toggle">{{ format(category.amount) }}</button>
-                </p>
-                <p class="card-text">
-                  <div id="add-to-category-form">
+                  <button type="button" class="btn btn-default toggle">{{ format(category.amount) }}</button>
+                  <div class="add-cash">
                     <form action="" method="post" class="form" role="form">
                       {{ add_to_category_form.csrf_token() }}
-                      <!-- Hidden field to store category ID -->
                       {{ add_to_category_form.category_id(value=category.category_id) }}
                       {{ wtf.render_field(add_to_category_form.amount) }}
                       <div class="add-cash-button">
@@ -100,14 +112,11 @@
                       </div>
                     </form>
                   </div>
-                  <div id="move-cash-form">
-                    <form action="" method="post" class="form" role="form">
-                      {{ move_to_category_form.csrf_token() }}
-                      {{ move_to_category_form.from_category_id(value=category.category_id) }}
-                      {{ wtf.render_form(move_to_category_form) }}
-                    </form>
-                  </div>
-                  
+                  <form action="" method="post" class="form hidden move-cash" role="form">
+                    {{ move_to_category_form.csrf_token() }}
+                    {{ move_to_category_form.from_category_id(value=category.category_id) }}
+                    {{ wtf.render_form(move_to_category_form) }}
+                  </form>
               </div>
             </div>
           </div>
@@ -126,7 +135,6 @@
               </p>
             </div>
           </div>
-        </div>
         </div>
       </div>
       

@@ -1,0 +1,90 @@
+header {
+    padding: 10px;
+    background:darkgreen;
+    text-align: center;
+}
+
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: darkgreen;
+    color: white;
+    text-align: center;
+    font-size: small;
+}
+
+.navbar-brand {
+    color: #FFFFFF;
+}
+
+.navbar-nav .navbar-brand .active>.nav-link, .navbar-light .navbar-nav .nav-link.active, .navbar-light .navbar-nav .nav-link.show, .navbar-light .navbar-nav .show>.nav-link {
+    color: #FFFFFF;
+}
+
+.navbar-nav .navbar-brand .nav-link {
+    color: #FFFFFF;
+}
+.navbar-brand, .navbar-text, .nav-link {
+    color:white;
+} 
+
+.navbar-nav, .navbar-brand:focus, .navbar-brand:hover, .nav-link:focus, .navbar-nav, .nav-link:hover {
+    color: #ccc !important;
+}
+
+.navbar {
+    background: darkgreen;
+}
+.navbar-brand {
+    font-family: 'Rubik', sans-serif;
+    font-size: 1.5em;
+    font-weight: 900;
+}
+.nav {
+    font-size: 1.0em;
+    font-family: 'Rubik', sans-serif;
+}
+
+.container {
+    font-family: 'Open Sans', sans-serif;
+    margin-bottom: 20px;
+}
+
+.card-img-top {
+    width: 100%;
+    height: 15vw;
+    object-fit: cover;
+}
+.control-label {
+    visibility: hidden;
+}
+.jumbotron {
+    font-family: 'Open Sans', sans-serif;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.delete-button {
+    padding: 5px;
+    float: right;
+    margin: 0;
+}
+
+.add-cash-button {
+    padding: 5px;
+    float: left;
+    margin: 0;
+}
+
+
+.btn-default {
+    color: rgba(1, 16, 224, 0.75);
+    letter-spacing: 1px;
+    line-height: 15px;
+    border: 2px solid rgba(1, 16, 224, 0.75);
+    border-radius: 40px;
+    background: transparent;
+    transition: all 0.3s ease 0s;
+}
