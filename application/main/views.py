@@ -1,13 +1,73 @@
 from datetime import datetime
-from flask import Flask, render_template, session, redirect, url_for, request
+from flask import Flask, abort, render_template, session, redirect, url_for, request, jsonify
 from flask_login import current_user, login_required
 from . import main
 from .. import db
 from .forms import AddCategoryForm, AddTransactionForm, AddToCategoryForm, DeleteTransactionForm, DeleteCategoryForm, MoveToCategoryForm
 from ..models import User, Category, Transaction, Payee
 from sqlalchemy import func
+from .utils.helpers import decimal_to_int, format_currency
 
-@main.route('/', methods = ['POST', 'GET'])
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
+
+    
+@main.route('/shutdown', methods=['GET'])
+def shutdown():
+    shutdown_server()
+    return 'Server shutting down...'
+
+
+# let's make this a rest API.. have javascript validate, send a JSON request
+@main.route('/add_to_category', methods = ['POST'])
+def add_to_category():
+    #TODO: do something if fails validation
+    AddToCategoryForm(request.form).validate_on_submit()
+    category = request.form.get('category')
+    amount = request.form.get('amount')
+    category = Category.query.filter_by(category_id=category).first()
+    category.amount = category.amount + decimal_to_int(amount)
+    user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
+    user_inflow.amount = user_inflow.amount - decimal_to_int(amount)
+    db.session.commit()
+    return redirect(url_for('main.index'))
+
+@main.route('/delete_category', methods = ['POST'])
+def delete_category():
+    DeleteCategoryForm(request.form).validate_on_submit()
+    category = request.form.get('category_id')
+    category = Category.query.filter_by(category_id=category).first()
+    user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
+    user_inflow.amount = user_inflow.amount + category.amount
+    db.session.delete(category)
+    db.session.commit()
+    return redirect(url_for('main.index'))
+
+@main.route('/add_category', methods=['POST'])
+def add_category():
+    AddCategoryForm(request.form).validate_on_submit()
+    name = request.form.get('category_name')
+    category = Category(name=name, amount=0, user_id=current_user.get_id())
+    db.session.add(category)
+    db.session.commit()
+    return redirect(url_for('main.index'))
+
+@main.route('/move_to_category', methods=['POST'])
+def move_to_category():
+    MoveToCategoryForm(request.form).validate_on_submit()
+    # to_category = Category.query.filter_by(category_id=user_categories[move_to_category_form.to_categories.data]).join(User).filter_by(user_id=current_user.get_id()).first()
+    # to_category.amount = to_category.amount + decimal_to_int(move_to_category_form.amount.data)
+    # from_category = Category.query.filter_by(category_id=move_to_category_form.from_category_id.data).first();
+    # from_category.amount = from_category.amount - decimal_to_int(move_to_category_form.amount.data)
+    # db.session.commit()
+
+    
+
+@main.route('/')
 def index():
     add_category_form = AddCategoryForm()
     add_to_category_form = AddToCategoryForm()
@@ -16,46 +76,15 @@ def index():
     user_categories = Category.query.filter_by(user_id=current_user.get_id()).all()
     user_categories = { category.name : category.category_id for category in user_categories }
     move_to_category_form.to_categories.choices = list(user_categories.keys())
-    if request.method == 'POST':
-        print(request.form.get('to_categories'))
-        user = current_user.get_id()
-        # If post request is from add_category form, add category to db
-        if request.form.get('submit') == "Add Category" and add_category_form.validate_on_submit():
-            category = Category(name=add_category_form.category_name.data, amount=0, user_id=current_user.get_id())
-            db.session.add(category)
-            db.session.commit()
-        # If post request is from add_to_category adjust amount in category in db
-        if request.form.get('submit') == "Add Cash" and add_to_category_form.validate_on_submit():
-            category = Category.query.filter_by(category_id=add_to_category_form.category_id.data).first()
-            category.amount = category.amount + decimal_to_int(add_to_category_form.amount.data)
-            user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
-            user_inflow.amount = user_inflow.amount - decimal_to_int(add_to_category_form.amount.data)
-            db.session.commit()
-        if  request.form.get('delete') == "Delete Category" and delete_category_form.validate_on_submit():
-            category = Category.query.filter_by(category_id=delete_category_form.category_id.data).first()
-            user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
-            user_inflow.amount = user_inflow.amount + category.amount
-            db.session.delete(category)
-            db.session.commit()
-        if request.form.get('submit') == "Move Cash" and move_to_category_form.validate_on_submit():
-            to_category = Category.query.filter_by(category_id=user_categories[move_to_category_form.to_categories.data]).join(User).filter_by(user_id=current_user.get_id()).first()
-            to_category.amount = to_category.amount + decimal_to_int(move_to_category_form.amount.data)
-            from_category = Category.query.filter_by(category_id=move_to_category_form.from_category_id.data).first();
-            from_category.amount = from_category.amount - decimal_to_int(move_to_category_form.amount.data)
-            db.session.commit()
-
-
-        return redirect(url_for('main.index'))
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
     else:
-        if not current_user.is_authenticated:
-            return redirect(url_for('auth.login'))
-        else:
-            user = current_user.get_id()
-            user_data = User.query.filter_by(user_id=user).first()
-            user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
-            categories = Category.query.filter_by(user_id=user).filter(Category.name.isnot('Inflow')).all()
-            unbudgeted = Category.query.filter_by(user_id=user, name="Inflow").first().amount
-            return render_template("index.html", categories=categories, unbudgeted_amount=unbudgeted, add_category_form=add_category_form, add_to_category_form=add_to_category_form, delete_category_form=delete_category_form, move_to_category_form=move_to_category_form) 
+        user = current_user.get_id()
+        user_data = User.query.filter_by(user_id=user).first()
+        user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
+        categories = Category.query.filter_by(user_id=user).filter(Category.name.isnot('Inflow')).all()
+        unbudgeted = Category.query.filter_by(user_id=user, name="Inflow").first().amount
+        return render_template("index.html", categories=categories, unbudgeted_amount=unbudgeted, add_category_form=add_category_form, add_to_category_form=add_to_category_form, delete_category_form=delete_category_form, move_to_category_form=move_to_category_form) 
 
 @main.route('/transactions', methods=['GET', 'POST'])
 @login_required
@@ -117,15 +146,37 @@ def transactions():
 def howto():
     return render_template("howto.html")
 
+#TODO: handle responses with json
+@main.route('/api', methods=['GET'])
+def api():
+    res = Category.query.filter_by(user_id=current_user.get_id()).all()
+    data = [ { 'id': x.category_id, 'name': x.name, 'amount': x.amount } for x in res]
+    return jsonify(data), 201
 
-# Helper methods - move to seperate pkg
-def decimal_to_int(value):
-    string_value = str(value)
-    if '.' not in string_value:
-        return int(string_value) * 100
-    parts = string_value.split('.')
-    intvalue = int(''.join(parts))
-    return intvalue
+@main.route('/api/add_category', methods=['POST'])
+def api_add_category():
+    if not request.json or not 'name' in request.json:
+        abort(404, description="no name provided") # uses the 404 error template
+    name = request.json['name']
+    # amount = request.json.get('amount', 0) - need to convert val to int
+    amount = 0
+    user = current_user.get_id()
+    category = Category(name=name, amount=amount, user_id=current_user.get_id())
+    db.session.add(category)
+    db.session.commit()
+    category = Category.query.filter_by(user_id=current_user.get_id(), name=name).first()
+    print(category.category_id)
+    return jsonify({'name': name, 'amount': amount, 'id': category.category_id}), 201
 
-def format_currency(value):
-    return "$" + str(float(value)/100)
+@main.route('/api/delete_category', methods = ['POST'])
+def api_delete_category():
+    print(request.json)
+    if not request.json or not 'id' in request.json:
+        abort(404, description="not a valid cateogory") # uses the 404 error template
+    cat_id = request.json['id']
+    category = Category.query.filter_by(category_id=cat_id).first()
+    user_inflow = Category.query.filter_by(user_id=current_user.get_id(), name='Inflow').first()
+    user_inflow.amount = user_inflow.amount + category.amount
+    db.session.delete(category)
+    db.session.commit()
+    return jsonify({'amount': category.amount, 'inflow_amount': user_inflow.amount}), 201

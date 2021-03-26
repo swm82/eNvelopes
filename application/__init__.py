@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from config import config
 from flask_login import LoginManager
 from sqlalchemy import MetaData, func
+from flask_cors import CORS
 
 # Format currency function for jinja templates (Put this in import)
 def format_currency(value):
@@ -33,6 +34,7 @@ login_manager.login_view = 'auth.login' # sets the view to redirect when non-log
 
 def create_app(config_name):
     app = Flask(__name__)
+    CORS(app)
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 

@@ -1,31 +1,14 @@
 {% extends "layout.html" %}
 {% import "bootstrap/form.html" as wtf %}
 
-  {% block scripts %}
-  {{ super() }}
-  <script>
-  $(document).ready(function(){
-    $(".toggle").on("click", function() {
-      const $moveCashForm = $(this).closest('.category').find('.move-cash');
-      const $addCashForm = $(this).closest('.category').find('.add-cash');
-      if ($moveCashForm.hasClass('hidden')) {
-        $moveCashForm.removeClass('hidden');
-        $addCashForm.addClass('hidden');
-      } else {
-        $addCashForm.removeClass('hidden');
-        $moveCashForm.addClass('hidden');
-      }
-      console.log($(this).closest('#category').find('#move-cash'));
-      
-    });
-  });
-  </script>
-  {% endblock %}
 
 
 {% block styles %}
   {{ super() }}
   <style>
+    .card {
+      min-width: fit-content;
+    }
     .card-img-top {
       width: 100%;
       height: 15vw;
@@ -34,14 +17,8 @@
     .control-label {
       visibility: hidden;
     }
-    .jumbotron {
-      font-family: 'Open Sans', sans-serif;
-      padding-top: 20px;
-      padding-bottom: 20px;
-    }
 
     .delete-button {
-      padding: 5px;
       float: right;
       margin: 0;
     }
@@ -51,7 +28,6 @@
       float: left;
       margin: 0;
     }
-
 
     .btn-default {
       color: rgba(1, 16, 224, 0.75);
@@ -67,6 +43,44 @@
     .hidden {
       display: none;
     }
+
+    #budget-amount {
+      background-color: #ddd;
+    }
+
+    .category-amount, .new-category {
+      background-color: #ddd;
+      border: none;
+      color: black;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 30px;
+    }
+    .new_category {
+      display: block;
+    }
+
+    .category-amount:hover, .new-category:hover {
+      background-color: #f1f1f1;
+    }
+
+    .category-amount:focus, .new-category:focus {
+      outline: none;
+    }
+
+    .btn-danger {
+      width: fit-content;
+      padding: 0px 7px;
+    }
+
+    .btn-outline-dark {
+      border-radius: 25px;
+
+    }
      
   </style>
 {% endblock %}
@@ -75,75 +89,202 @@
     Home
 {% endblock %}
 
+
 {% block page_content %}
-{% if current_user.is_authenticated %}
-<div class="container-fluid padding">
-    <div class="jumbotron jumbotron-fluid">
-      <div class="container">
-        <h1 class="display-4 text-center">Budget</h1>
-        <hr class="my-4">
-        <p class="lead text-center">Unbudgeted Amount:</p>
-        <p class="lead text-center">{{ format(unbudgeted_amount) }}</p>
+<main class="container">
+  {% if current_user.is_authenticated %}
+  <section class="row justify-content-center">
+    <div class="col-sm card text-center m-1" id="budget-amount" style="max-width: 500px">
+      <div class="card-body text-center">
+        <h1 class="card-title">Budget</h1>
+        <p class="card-text">
+          Unbudgeted Amount:
+          <br>
+          <span id="unbudgeted-amount"></span>
+        </p>
       </div>
     </div>
-      <div id="cards">
-        <div class="row padding">
-        {% for category in categories %}
-          <div class="col-md-4 col-sm-6">
-            <div class="card border-secondary mb-3 text-center category">
-              <img class="card-img-top" src="{{ url_for('static', filename = 'envelope.jpg') }}">
-              <div class="card-body">
-                <h4 class="card-title" name="{{ category.id }}">{{ category.name }}</h4>
-                  <button type="button" class="btn btn-default toggle">{{ format(category.amount) }}</button>
-                  <div class="add-cash">
-                    <form action="" method="post" class="form" role="form">
-                      {{ add_to_category_form.csrf_token() }}
-                      {{ add_to_category_form.category_id(value=category.category_id) }}
-                      {{ wtf.render_field(add_to_category_form.amount) }}
-                      <div class="add-cash-button">
-                        {{ add_to_category_form.submit(class_="btn btn-primary") }}
-                      </div>
-                    </form>
-                    <form action="" method="post" class="form" role="form">
-                      <div class="delete-button">
-                        {{ delete_category_form.csrf_token() }}
-                        {{ delete_category_form.category_id(value=category.category_id) }}
-                        {{ delete_category_form.delete(class_="btn btn-danger") }}
-                      </div>
-                    </form>
-                  </div>
-                  <form action="" method="post" class="form hidden move-cash" role="form">
-                    {{ move_to_category_form.csrf_token() }}
-                    {{ move_to_category_form.from_category_id(value=category.category_id) }}
-                    {{ wtf.render_form(move_to_category_form) }}
-                  </form>
-              </div>
-            </div>
+  </section>
+  <section class="container-fluid" id="container-envelopes">
+    <div class="row justify-content-center" id="envelopes">
+      <!-- {% for category in categories %}
+        <article class="test2 card text-white bg-info col-md-3 col-sm-6 m-2" id="{{category.category_id}}-card">
+          <form action="{{ url_for('main.delete_category') }}" method="post" class="form" role="form">
+              {{ delete_category_form.csrf_token() }}
+              {{ delete_category_form.category_id(value=category.category_id) }}
+              {{ delete_category_form.delete(class_="btn btn-danger mt-3") }}
+          </form>
+          <div class="card-body text-center">
+            <h4 class="card-title" name="{{ category.category_id }}">{{ category.name }}</h4>
+            <button class="category-amount" data-toggle="modal" data-target="#modal" data-category="{{category.category_id}}">{{ format(category.amount) }}</button>
           </div>
-        {% endfor %}
-        <div class="col-md-3 col-sm-6">
-          <div class="card border-primary mb-3 text-center">
-            <img class="card-img-top" src="{{ url_for('static', filename = 'envelope.jpg') }}">
-            <div class="card-body">
-              <h4 class="card-title">Add Category</h4>
-              <p class="card-text">
-                <form action="" method="post" class="form" role="form">
-                  {{ add_category_form.csrf_token() }}
-                  <td>{{ wtf.render_field(add_category_form.category_name) }}</td>
-                  {{ add_category_form.submit(class_="btn btn-primary") }}
-              </form>
-              </p>
+        </article>
+      {% endfor %} -->
+
+        <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="test" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Add/Remove Cash</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+                <form action="{{ url_for('main.add_to_category') }}" method="post">
+                  <div class="modal-body">
+                      <div class="form-group">
+                        {{ add_to_category_form.csrf_token() }}
+                        {{ add_to_category_form.category_id() }}
+                        {{ wtf.render_field(add_to_category_form.amount) }}
+                      </div>
+                      <input type="hidden" id="modal-category" name="category">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    {{ add_to_category_form.submit(class_="btn btn-primary") }}
+                  </div>
+                </form>
             </div>
           </div>
         </div>
-      </div>
-      
-  </div>
+
+      <article class="test2 card text-white bg-info col-md-3 col-sm-6 m-2" id="add-category-card">
+        <div class="card-body text-center">
+          <h4 class="card-title">Add Category</h4>
+          <div class="form-group">
+            <input type="text" class="form-control new-category" placeholder="Name" id="new-category-name">
+            <button type="button" class="btn btn-outline-dark" id="add-category-button">Submit</button>
+          </div>
+        </div>
+      </article>
+  </section>
+  <!-- TODO: handle move money -->
+  <!-- <form action="" method="post" class="form  move-cash" role="form">
+    {{ move_to_category_form.csrf_token() }}
+    {{ move_to_category_form.from_category_id() }}
+    {{ wtf.render_form(move_to_category_form) }}
+  </form> -->
   {% else %}
-  <h1>TODO: Redirect to register</h1>
+    <section class="container-fluid" id=>
+      <h1>TODO: Redirect to register</h1>
+    </section>
   {% endif %}
+  </main>
   {% endblock %}
 
 
+{% block scripts %}
+  {{ super() }}
+  <script>
+    $('#modal').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget) // Button that triggered the modal
+      var category = button.data('category') // Extract info from data-* attributes
+      // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+      // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+      var modal = $(this)
+      console.log(category)
+      modal.find('#modal-category').val(category)
+    })
+
+    window.addEventListener('load', (e) => {
+      url = 'http://127.0.0.1:5000/api'
+      fetch(url)
+        .then(response=> response.json())
+        .then(data => {
+          data.forEach(item =>  {
+            console.log(item['name'])
+            if (item['name'] !== 'Inflow') addEnvelope(item)
+            else {
+              unbudgeted_amount = document.getElementById('unbudgeted-amount')
+              unbudgeted_amount.textContent = '$' + (item['amount']/100)
+            }
+          })
+          console.log(data)
+        })
+    })
+
+    document.getElementById('add-category-button').addEventListener('click', e => {
+      url = 'http://127.0.0.1:5000/api/add_category'
+      name = document.getElementById('new-category-name').value
+      b = { 'name': name }
+      fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify(b)
+      })
+        .then(response => response.json())
+        .then(result =>  {
+          addEnvelope(result)
+          console.log(result)
+        })
+    })
+
+    // TODO: Update unbudgeted amount on delete
+    // TODO: catch errors
+    function removeEnvelope(category) {
+      let card_to_delete = document.getElementById(`${category}-card`)
+      let container = card_to_delete.parentNode
+      url = 'http://127.0.0.1:5000/api/delete_category'
+      b = { 'id': category }
+      fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify(b)
+      })
+        .then(response => response.json())
+        .then(result =>  {
+
+          unbudgeted_amount = document.getElementById('unbudgeted-amount')
+          unbudgeted_amount.textContent = '$' + (result['inflow_amount']/100)
+          container.removeChild(card_to_delete)
+          console.log(result)
+        })
+
+    }
+
+    function addEnvelope(data) {
+      let name = data['name']
+      let amt = '$' + (parseInt(data['amount'])/100)
+      console.log(amt)
+      let id = data['id']
+      let container = document.getElementById('envelopes')
+      let add_card = document.getElementById('add-category-card')
+      let card = document.createElement('article')
+      card.className = 'test2 card text-white bg-info col-md-3 col-sm-6 m-2'
+      card.id = `${id}-card`
+      let delete_button = document.createElement('button')
+      delete_button.addEventListener('click', () => removeEnvelope(id))
+      delete_button.className = 'btn btn-danger mt-3'
+      let del_text = document.createTextNode('x')
+      delete_button.appendChild(del_text)
+      let card_body = document.createElement('div')
+      card_body.className = 'card-body text-center'
+      let card_title = document.createElement('h4')
+      card_title.className = 'card-title'
+      let title = document.createTextNode(name)
+      card_title.appendChild(title)
+      let amount_button = document.createElement('button')
+      amount_button.className = 'category-amount'
+      amount_button.setAttribute('data-toggle', 'modal')
+      amount_button.setAttribute('data-target', '#modal')
+      amount_button.setAttribute('data-category', id)
+      let amount = document.createTextNode(amt)
+      amount_button.appendChild(amount)
+      card_body.appendChild(card_title)
+      card_body.appendChild(amount_button)
+      card.appendChild(delete_button)
+      card.appendChild(card_body)
+      container.insertBefore(card, add_card)
+    }
+  </script>
+  
+
+{% endblock %}
 
 

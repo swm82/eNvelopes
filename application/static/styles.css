@@ -1,8 +1,25 @@
 header {
-    padding: 10px;
-    background:darkgreen;
-    text-align: center;
+    padding: 10px 30px;
+    background-color: darkgreen;
 }
+/* header {
+    display: flex;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    -webkit-box-align: center;
+    align-items: center;
+    width: 100%;
+    margin: 0px;
+    padding: 0px 30px;
+    position: fixed;
+    top: 0px;
+    z-index: 100;
+    background-color:darkgreen;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(10px);
+    padding-bottom: 0px;
+    text-align: center;
+} */
 
 footer {
     position: fixed;
@@ -34,9 +51,7 @@ footer {
     color: #ccc !important;
 }
 
-.navbar {
-    background: darkgreen;
-}
+
 .navbar-brand {
     font-family: 'Rubik', sans-serif;
     font-size: 1.5em;
@@ -60,11 +75,6 @@ footer {
 .control-label {
     visibility: hidden;
 }
-.jumbotron {
-    font-family: 'Open Sans', sans-serif;
-    padding-top: 20px;
-    padding-bottom: 20px;
-}
 
 .delete-button {
     padding: 5px;
@@ -87,4 +97,8 @@ footer {
     border-radius: 40px;
     background: transparent;
     transition: all 0.3s ease 0s;
+}
+
+body {
+    background-color: slategray;
 }

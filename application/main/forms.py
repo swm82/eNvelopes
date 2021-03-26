@@ -42,4 +42,4 @@ class DeleteTransactionForm(FlaskForm):
 
 class DeleteCategoryForm(FlaskForm):
     category_id = HiddenField()
-    delete = SubmitField('Delete Category')
+    delete = SubmitField('x')
