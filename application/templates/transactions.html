@@ -1,92 +1,155 @@
 {% extends "layout.html" %}
 {% import "bootstrap/form.html" as wtf %}
 
-{% block styles %}
-    {{ super() }} 
-    <style>
-        .form-control-label {
-            display: none;
-        }
-
-        .page-header, .table {
-            font-family: 'Open Sans', sans-serif;
-        }
-
-        .page-header {
-            padding: 10px;
-        }
-    </style>
-{% endblock %}
-
 {% block title %}
     Transactions
 {% endblock %}
 
+{% block styles %}
+{{ super() }}
+<style>
+    .transaction-column {
+        display: table-cell;
+        list-style: none;
+        padding: 5px;
+        width: fit-content;
+    }
+
+    .transaction-columns {
+        padding: 0;
+    }
+    .table-row {
+        display:table-row;
+        padding: 0;
+    }
+</style>
+{% endblock %}
+
 {% block page_content %}
 {% if current_user.is_authenticated %}
-<div class="container-fluid padding">
-    <div class="page-header text-center">
-        <h1>Transactions</h1>
-    </div>
+<main class='container padding'>
+    <table class="table table-sm text-center bg-light">
+        <thead>
+            <tr>
+                <th scope="col">Category</th>
+                <th scope="col">Payee</th>
+                <th scope="col">Amount</th>
+                <!-- <th scope="col">Inflow/Outflow</th> -->
+                <th scope="col">Time</th>
+                <th scope="col">Delete</th>
+            </tr>
+        </thead>
+        <tbody id="transactions-body">
+            <!-- Dynamically generated table -->
+        </tbody>
+    </table>
 
-    <div clas="container-fluid padding">
-      <div class="row padding">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">Category</th>
-                    <th scope="col">Payee</th>
-                    <th scope="col">Amount</th>
-                    <th scope="col">Inflow/Outflow</th>
-                    <th scope="col">Time</th>
-                    <th scope="col">Delete</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <form action="" method="post" class="form" role="form">
-                        {{ add_transaction_form.csrf_token() }}
-                        <td>{{ wtf.render_field(add_transaction_form.category) }}</td>
-                        <td>{{ wtf.render_field(add_transaction_form.payee) }}</td>
-                        <td>{{ wtf.render_field(add_transaction_form.amount) }}</td>
-                        <td></td>
-                        <td></td>
-                        <td><button type="submit" name="submit" class="btn btn-primary" value="add_transaction">Add Transaction</button></td>
-                    </form>
-                </tr>
-                {% for transaction in transactions %}
-                <tr>
-                    <form action="" method="post" class="form" role="form">
-                        {{ delete_transaction_form.csrf_token() }}
-                        <td>{{ category_dict[transaction.category_id] }}</td>
-                        <td>{{ payee_dict[transaction.payee_id] }}</td>
-                        {% if category_dict[transaction.category_id] == 'Inflow' %}
-                            <td>{{ format(transaction.amount * -1) }}</td>
-                        {% else %}
-                            <td>{{ format(transaction.amount) }}</td>
-                        {% endif %}
-                        {% if transaction.inflow == 1 %}
-                            <td style="color: green">Inflow</td>
-                        {% else %}
-                            <td style="color: red">Outflow</td>
-                        {% endif %}
-                        <td>{{ transaction.timestamp }}</td>
-                        <!-- Hidden field to store transaction id -->
-                        {{ delete_transaction_form.transaction_id(value=transaction.trans_id) }}
-                        {{ delete_transaction_form.category_id(value=transaction.category_id) }}
-                        {{ delete_transaction_form.transaction_amount(value=transaction.amount) }}
-                        <td><button type="submit" name="submit" class="btn btn-danger" value="delete_transaction">Delete</button></td>
-                    </form>
-                </tr>
-                {% endfor %}
-            
-            </tbody>
-        </table>
-      </div>
-    </div>
-    
-</div>
+    <!-- Table row approach
+    <section class="container transactions">
+        <ul class="list-group">
+            <li class="list-group-item table-row">
+                <ul class="transaction-columns">
+                    <li class="transaction-column">Category</li>
+                    <li class="transaction-column">Payee</li>
+                </ul>
+            </li>
+            <li class="list-group-item table-row">
+                <ul class="transaction-columns">
+                    <li class="transaction-column">TESTETSTEST</li>
+                    <li class="transaction-column">TESTSETETSETE</li>
+                </ul>
+            <li class="list-group-item">Dapibus ac facilisis in</li>
+            <li class="list-group-item">Morbi leo risus</li>
+            <li class="list-group-item">Porta ac consectetur ac</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+          </ul>
+    </section> -->
+</main>
 {% else %}
 <h1>TODO: Redirect to register</h1>
 {% endif %}
+{% endblock %}
+
+
+{% block scripts %}
+    <script>
+        window.addEventListener('load', (e) => {
+        url = 'http://127.0.0.1:5000/api/transactions'
+        fetch(url)
+            .then(response=> response.json())
+            .then(data => {
+                const transactions = document.querySelector('#transactions-body')
+                // const firstTransaction = transactions.firstChild
+                data.forEach(transaction => addTransaction(transactions, transaction))
+            })
+        })
+
+        const addTransaction = (container, transaction, before) => {
+            let row = newElement('tr')
+            let category = newElement('td', 'transaction-category')
+            addText(category, transaction['category_name'] ? transaction['category_name'] : '')
+            let payee = newElement('td', 'transaction-payee')
+            addText(payee, transaction['payee_name'] ? transaction['payee_name'] : '')
+            let amount = newElement('td', 'transaction-amount')
+            addText(amount, transaction['category_name'] == 'Inflow' ? `$${(parseInt(transaction['amount']) / 100) * - 1}` :`$${parseInt(transaction['amount']) / 100}`)
+            amount.style.color = transaction['amount'] < 0 ? 'green' : 'red'
+            let time = newElement('td', 'transaction-time')
+            addText(time, transaction['time'])
+            let delete_button = newElement('button', 'btn btn-danger')
+            delete_button.addEventListener('click', e => deleteTransaction(e))
+            addText(delete_button, 'Delete')
+            const id = document.createElement('input')
+            id.setAttribute('type', 'hidden')
+            id.setAttribute('value', transaction['id'])
+            appendInOrder(row, [category, payee, amount, time, delete_button, id])
+            container.appendChild(row)
+        }
+
+        const deleteTransaction = (e) => {
+            const curr_button = e.target
+            const id = curr_button.nextSibling.getAttribute('value')
+            // API DELETE
+            url = 'http://127.0.0.1:5000/api/delete_transaction'
+            data = {'transaction_id': id}
+            fetch(url, {
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(result =>  {
+                })
+
+            row = curr_button.parentNode
+            table = document.querySelector('#transactions-body')
+            table.removeChild(row)
+        }
+
+ 
+        const appendInOrder = (parent, children) => {
+            for (child of children) {
+                parent.appendChild(child)
+            }
+        }
+
+        const newElement = (tag, className) => {
+            const el = document.createElement(tag)
+            if (className) el.className = className
+            return el
+        }
+
+        const addAttributes = (el, attrs) => {
+            for (const attr in attrs) {
+                el.setAttribute(attr, attrs[attr])
+            }
+        }
+
+        const addText = (el, text) => {
+            const textNode = document.createTextNode(text)
+            el.appendChild(textNode)
+        }
+    </script>
 {% endblock %}

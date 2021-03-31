@@ -14,21 +14,24 @@
 
 {% block styles %}
     {{ super() }}
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> -->
-    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=PT+Sans&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/5e9a937f95.js" crossorigin="anonymous"></script>
 {% endblock %}
 
 
 {% block title %}eNvelopes{% endblock %}
 
 {% block content %}
+<div class="layout-content">
     <header class="d-flex justify-content-between align-items-center">
         <div>
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">eNvelopes</a>
+            <a class="navbar-brand" id="logo" href="{{ url_for('main.index') }}">Envelopes<span>*</span></a>
         </div>
-        <img src="{{ url_for('static', filename='logo.png') }}" height=100px>
-        <nav class="navbar-expand-sm navbar-expand-md navbar-expand-lg navbar">
+        <img class="logo" src="{{ url_for('static', filename='logo.png') }}" height=100px>
+        <nav class="flex-sm-columns navbar-expand-md navbar-expand-lg navbar">
             <div class="container-fluid">
                 <ul class="nav navbar-nav">
                     <li class="nav-item">
@@ -62,5 +65,6 @@
     <footer>
         © Envelopes - 2020
     </footer>
+</div>
 {% endblock %}
 

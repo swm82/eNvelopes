@@ -6,15 +6,41 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="card text-center">
-    <div class="card-title">
-        <h1>Login</h1>
+<main class="d-flex container justify-content-center align-items-center">
+    <div class="card text-center mt-3 bg-light">
+        <div class="card-title">
+            <h1>Login</h1>
+        </div>
+        <div class="card-body">
+            {{ wtf.render_form(form) }}
+            <p>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-dark">Register</a>
+            </p>
+        </div>
     </div>
-    <div class="card-body">
-        {{ wtf.render_form(form) }}
-        <p>
-            New users <a href="{{ url_for('auth.register') }}">click here</a>
-        </p>
-    </div>
-</div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("submit", (e) => {
+    // Store reference to form to make later code easier to read
+    const form = e.target;
+    console.log('submtted')
+  
+    // Post data using the Fetch API
+    fetch(form.action, {
+      method: form.method,
+      body: new FormData(form),
+    })
+        .then(resp =>  {
+            if (resp.status === 200) window.location = 'http://127.0.0.1:5000/'
+            else alert('incorrect password')
+            console.log(resp.status)
+        });
+  
+    // Prevent the default form submit
+    e.preventDefault();
+  });
+</script>
 {% endblock %}

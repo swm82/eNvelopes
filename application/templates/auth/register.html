@@ -6,10 +6,18 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1>Register</h1>
-</div>
-<div class="col-md-4">
-    {{ wtf.render_form(form) }}
-</div>
+<main class="d-flex container justify-content-center align-items-center">
+    <div class="card text-center mt-3 bg-light">
+        <div class="card-title">
+            <h1>Register</h1>
+        </div>
+        <div class="card-body text-center">
+            {{ wtf.render_form(form) }}
+            <p>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-dark">Login</a>
+            </p>
+        </div>
+    </div>
+</main>
+
 {% endblock %}

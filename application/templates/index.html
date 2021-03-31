@@ -1,90 +1,6 @@
 {% extends "layout.html" %}
 {% import "bootstrap/form.html" as wtf %}
 
-
-
-{% block styles %}
-  {{ super() }}
-  <style>
-    .card {
-      min-width: fit-content;
-    }
-    .card-img-top {
-      width: 100%;
-      height: 15vw;
-      object-fit: cover;
-    }
-    .control-label {
-      visibility: hidden;
-    }
-
-    .delete-button {
-      float: right;
-      margin: 0;
-    }
-
-    .add-cash-button {
-      padding: 5px;
-      float: left;
-      margin: 0;
-    }
-
-    .btn-default {
-      color: rgba(1, 16, 224, 0.75);
-      letter-spacing: 1px;
-      line-height: 15px;
-      border: 2px solid rgba(1, 16, 224, 0.75);
-      border-radius: 40px;
-      background: transparent;
-      transition: all 0.3s ease 0s;
-      margin-bottom: 10px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    #budget-amount {
-      background-color: #ddd;
-    }
-
-    .category-amount, .new-category {
-      background-color: #ddd;
-      border: none;
-      color: black;
-      padding: 10px 20px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      margin: 4px 2px;
-      cursor: pointer;
-      border-radius: 30px;
-    }
-    .new_category {
-      display: block;
-    }
-
-    .category-amount:hover, .new-category:hover {
-      background-color: #f1f1f1;
-    }
-
-    .category-amount:focus, .new-category:focus {
-      outline: none;
-    }
-
-    .btn-danger {
-      width: fit-content;
-      padding: 0px 7px;
-    }
-
-    .btn-outline-dark {
-      border-radius: 25px;
-
-    }
-     
-  </style>
-{% endblock %}
-
 {% block title %}
     Home
 {% endblock %}
@@ -93,70 +9,79 @@
 {% block page_content %}
 <main class="container">
   {% if current_user.is_authenticated %}
-  <section class="row justify-content-center">
-    <div class="col-sm card text-center m-1" id="budget-amount" style="max-width: 500px">
+  <div class="row justify-content-center">
+    <section class="card col-sm card text-center m-1 unbudgeted-card" id="budget-amount">
       <div class="card-body text-center">
-        <h1 class="card-title">Budget</h1>
-        <p class="card-text">
-          Unbudgeted Amount:
-          <br>
-          <span id="unbudgeted-amount"></span>
+        <!-- <h1 class="card-title">Budget</h1> -->
+        <h3 class="card-title">Unbudgeted Amount:</h3>
+        <p>
+          <button type="button" class="btn btn-primary amount-button unbudgeted-amount" id="unbudgeted-amount" data-toggle="modal" data-inflow="true" data-target="#add-transaction-modal"></button>
+
         </p>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
   <section class="container-fluid" id="container-envelopes">
     <div class="row justify-content-center" id="envelopes">
-      <!-- {% for category in categories %}
-        <article class="test2 card text-white bg-info col-md-3 col-sm-6 m-2" id="{{category.category_id}}-card">
-          <form action="{{ url_for('main.delete_category') }}" method="post" class="form" role="form">
-              {{ delete_category_form.csrf_token() }}
-              {{ delete_category_form.category_id(value=category.category_id) }}
-              {{ delete_category_form.delete(class_="btn btn-danger mt-3") }}
-          </form>
-          <div class="card-body text-center">
-            <h4 class="card-title" name="{{ category.category_id }}">{{ category.name }}</h4>
-            <button class="category-amount" data-toggle="modal" data-target="#modal" data-category="{{category.category_id}}">{{ format(category.amount) }}</button>
-          </div>
-        </article>
-      {% endfor %} -->
-
-        <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="test" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Add/Remove Cash</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-                <form action="{{ url_for('main.add_to_category') }}" method="post">
-                  <div class="modal-body">
-                      <div class="form-group">
-                        {{ add_to_category_form.csrf_token() }}
-                        {{ add_to_category_form.category_id() }}
-                        {{ wtf.render_field(add_to_category_form.amount) }}
-                      </div>
-                      <input type="hidden" id="modal-category" name="category">
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    {{ add_to_category_form.submit(class_="btn btn-primary") }}
-                  </div>
-                </form>
-            </div>
-          </div>
-        </div>
-
-      <article class="test2 card text-white bg-info col-md-3 col-sm-6 m-2" id="add-category-card">
+      <!-- Dynamically generated categories -->
+      <article class="card bg-light col-md-3 col-sm-6 m-2" id="add-category-card">
         <div class="card-body text-center">
           <h4 class="card-title">Add Category</h4>
           <div class="form-group">
-            <input type="text" class="form-control new-category" placeholder="Name" id="new-category-name">
+            <input type="text" class="form-control new-category" required type="text" placeholder="Name" id="new-category-name">
             <button type="button" class="btn btn-outline-dark" id="add-category-button">Submit</button>
           </div>
         </div>
       </article>
+
+  </section>
+  <section class="modal fade" id="add-cash-modal" tabindex="-1" role="dialog" aria-labelledby="test" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+      <div class="modal-content text-center">
+        <div class="modal-header">
+          <h5 class="modal-title">Add/Remove Cash</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input class="form-control" placeholder="Amount" id="add-cash-amount" required type="text">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-outline-dark" id="add-cash-button" data-dismiss="modal">Submit</button>
+          <input type="hidden" id="modal-category" name="category">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="modal fade" id="add-transaction-modal" tabindex="-1" role="dialog" aria-labelledby="test" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+      <div class="modal-content text-center">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Transaction</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+          <form action="{{ url_for('main.api_add_transaction') }}" method="post">
+            <div class="modal-body">
+              <input type="hidden" id="transaction-category" name="category">
+              <div class='pill-input'>
+                <input class="form-control" placeholder="Amount" id="transaction-amount">
+                <input class="form-control" id="transaction-payee" required type="text" list="payee-list">
+                  <datalist id="payee-list">
+                    <!-- Dynamically generated -->
+                  </datalist>
+                <!-- <select class="form-control" id="payee-selector">
+                    <option value="" disabled selected>Payee</option>
+                </select> -->
+              </div>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" data-dismiss="modal" id="submit-transaction">Submit</button>
+            </div>
+          </form>
+      </div>
+    </div>
   </section>
   <!-- TODO: handle move money -->
   <!-- <form action="" method="post" class="form  move-cash" role="form">
@@ -176,14 +101,48 @@
 {% block scripts %}
   {{ super() }}
   <script>
-    $('#modal').on('show.bs.modal', function (event) {
+    // TODO: Update unbudgeted amount on delete
+    // TODO: catch errors
+    // TODO: input validation
+
+    // Set enter functionality for input
+    // let inputs = document.getElementsByTagName('input')
+    // console.log(inputs)
+    // Array.from(inputs).forEach(input => input.addEventListener('keyup', e => {
+    //   let sib = input.nextSibling
+    //   while (sib) {
+    //     if (sib.matches('button')) break;
+    //   }
+    //   if (e.keyCode === 13) {
+    //     sib.click()
+    //   }
+    // }))
+
+    $('#add-cash-modal').on('show.bs.modal', function (event) {
       var button = $(event.relatedTarget) // Button that triggered the modal
       var category = button.data('category') // Extract info from data-* attributes
       // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
       // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
       var modal = $(this)
-      console.log(category)
+
       modal.find('#modal-category').val(category)
+    })
+
+    // TODO: Ajax call to get list of payees
+    $('#add-transaction-modal').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget) // Button that triggered the modal
+      var category = button.data('category') // Extract info from data-* attributes
+      console.log(button.data('inflow'))
+      // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+      // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+      var modal = $(this)
+      const title = modal.find('.modal-title').text('Add Income')
+      if (button.data('inflow')) {
+        title.text('Add Income')
+      } else {
+        title.text('Add Transaction')
+      }
+      modal.find('#transaction-category').val(category)
     })
 
     window.addEventListener('load', (e) => {
@@ -191,22 +150,93 @@
       fetch(url)
         .then(response=> response.json())
         .then(data => {
-          data.forEach(item =>  {
-            console.log(item['name'])
+          data['categories'].forEach(item =>  {
             if (item['name'] !== 'Inflow') addEnvelope(item)
             else {
               unbudgeted_amount = document.getElementById('unbudgeted-amount')
               unbudgeted_amount.textContent = '$' + (item['amount']/100)
+              unbudgeted_amount.id = `${item['id']}-amount`
+              unbudgeted_amount.setAttribute('data-category', item['id'])
+              // TODO: add income modal
             }
           })
-          console.log(data)
+          let payee_selector = document.getElementById('payee-list')
+          data['payees'].forEach(item => {
+            let choice = document.createElement('option')
+            choice.textContent = item['name']
+            payee_selector.appendChild(choice)
+          })
         })
     })
 
+    document.querySelector('#add-cash-button').addEventListener('click', e => {
+      const url = 'http://127.0.0.1:5000/api/add_to_category'
+      const button = e.target;
+      const category_id = button.nextElementSibling.value
+      const amount_input = document.querySelector('#add-cash-amount')
+      const amount = amount_input.value
+      amount_input.value = ''
+      const data = {'category_id': category_id, 'amount': amount}
+      fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
+        .then(response => response.json())
+        .then(result =>  {
+          const category_amount = parseInt(result['category_amount']) / 100
+          const inflow_amount = parseInt(result['inflow_amount']) / 100
+          const inflow_card = document.querySelector('.unbudgeted-amount')
+          const card_to_update = document.getElementById(`${category_id}-amount`)
+          card_to_update.textContent = '$' + category_amount
+          card_to_update.style.transform = 'scale(1.7)'
+          inflow_card.textContent = '$' + inflow_amount
+          inflow_card.style.transform = 'scale(1.7)'
+          setTimeout(() => {
+            card_to_update.style.transform = 'scale(1.0)'
+            inflow_card.style.transform = 'scale(1.0)'
+          }, 200)
+        })
+    })
+
+    document.getElementById('submit-transaction').addEventListener('click', e => {
+      url = 'http://127.0.0.1:5000/api/add_transaction'
+      category_id = document.getElementById('transaction-category').value
+      amount_input = document.getElementById('transaction-amount')
+      amount = amount_input.value
+      amount_input.value = ''
+      payee = document.querySelector('#transaction-payee').value
+      data = {'category': category_id, 'amount': amount}
+      if (payee) {
+        data['payee_name'] = payee
+      }
+      fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
+        .then(response => response.json())
+        .then(result =>  {
+          amount =  parseInt(result['category_amount']) / 100
+          category = result['category_id']
+          let card_to_update = document.getElementById(`${category}-amount`)
+          card_to_update.textContent = '$' + amount
+          card_to_update.style.transform = 'scale(1.7)'
+          setTimeout(() => card_to_update.style.transform = 'scale(1.0)', 200)
+        })
+    })
+
+
     document.getElementById('add-category-button').addEventListener('click', e => {
       url = 'http://127.0.0.1:5000/api/add_category'
-      name = document.getElementById('new-category-name').value
-      b = { 'name': name }
+      name_field = document.getElementById('new-category-name')
+      b = { 'name': name_field.value }
       fetch(url, {
         headers: {
           'Accept': 'application/json',
@@ -218,12 +248,10 @@
         .then(response => response.json())
         .then(result =>  {
           addEnvelope(result)
-          console.log(result)
         })
+          name_field.value = ""
     })
 
-    // TODO: Update unbudgeted amount on delete
-    // TODO: catch errors
     function removeEnvelope(category) {
       let card_to_delete = document.getElementById(`${category}-card`)
       let container = card_to_delete.parentNode
@@ -239,11 +267,10 @@
       })
         .then(response => response.json())
         .then(result =>  {
-
-          unbudgeted_amount = document.getElementById('unbudgeted-amount')
+          unbudgeted_amount = document.querySelector('.unbudgeted-amount')
+          console.log(unbudgeted_amount)
           unbudgeted_amount.textContent = '$' + (result['inflow_amount']/100)
           container.removeChild(card_to_delete)
-          console.log(result)
         })
 
     }
@@ -251,37 +278,52 @@
     function addEnvelope(data) {
       let name = data['name']
       let amt = '$' + (parseInt(data['amount'])/100)
-      console.log(amt)
       let id = data['id']
-      let container = document.getElementById('envelopes')
-      let add_card = document.getElementById('add-category-card')
-      let card = document.createElement('article')
-      card.className = 'test2 card text-white bg-info col-md-3 col-sm-6 m-2'
+      let container = document.querySelector('#envelopes')
+      let add_card = document.querySelector('#add-category-card')
+      const card = newElement('article','test2 card bg-light col-md-3 col-sm-6 m-2')
       card.id = `${id}-card`
-      let delete_button = document.createElement('button')
+      const action_buttons = newElement('div', 'd-flex justify-content-between')
+      const delete_button = newElement('button', 'btn btn-danger mt-3 mr-3 round-button')
       delete_button.addEventListener('click', () => removeEnvelope(id))
-      delete_button.className = 'btn btn-danger mt-3'
-      let del_text = document.createTextNode('x')
-      delete_button.appendChild(del_text)
-      let card_body = document.createElement('div')
-      card_body.className = 'card-body text-center'
-      let card_title = document.createElement('h4')
-      card_title.className = 'card-title'
-      let title = document.createTextNode(name)
-      card_title.appendChild(title)
-      let amount_button = document.createElement('button')
-      amount_button.className = 'category-amount'
-      amount_button.setAttribute('data-toggle', 'modal')
-      amount_button.setAttribute('data-target', '#modal')
-      amount_button.setAttribute('data-category', id)
-      let amount = document.createTextNode(amt)
-      amount_button.appendChild(amount)
+      delete_button.innerHTML = '<i class="far fa-trash-alt"></i>'
+      const add_transaction_button = newElement('button','btn btn-success mt-3 round-button')
+      addAttributes(add_transaction_button, {'data-toggle': 'modal', 'data-target': '#add-transaction-modal', 'data-category': id })
+      add_transaction_button.innerHTML = '<i class="fas fa-plus"></i>'
+      action_buttons.appendChild(delete_button)
+      action_buttons.appendChild(add_transaction_button)
+
+      const card_body = newElement('div', 'card-body text-center')
+      const card_title = newElement('h1', 'card-title')
+      addText(card_title, name)
+      const amount_button = newElement('button','btn btn-primary amount-button')
+      addAttributes(amount_button, {'data-toggle': 'modal', 'data-target': '#add-cash-modal', 'data-category': id })
+      amount_button.id = `${id}-amount`
+      addText(amount_button, amt)
       card_body.appendChild(card_title)
       card_body.appendChild(amount_button)
-      card.appendChild(delete_button)
+      card.appendChild(action_buttons)
       card.appendChild(card_body)
       container.insertBefore(card, add_card)
     }
+
+    const newElement = (tag, className) => {
+      const el = document.createElement(tag)
+      el.className = className
+      return el
+    }
+
+    const addAttributes = (el, attrs) => {
+      for (const attr in attrs) {
+        el.setAttribute(attr, attrs[attr])
+      }
+    }
+
+    const addText = (el, text) => {
+      const textNode = document.createTextNode(text)
+      el.appendChild(textNode)
+    }
+
   </script>
   
 

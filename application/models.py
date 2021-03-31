@@ -68,6 +68,7 @@ class Transaction(db.Model):
     def __repr__(self):
         return'<Transaction %r>' %self.trans_id
 
+
 class Category(db.Model):
     __tablename__ = 'categories'
     __table_args__ = {'extend_existing': True}
@@ -80,6 +81,7 @@ class Category(db.Model):
 
     def __repr__(self):
         return '<Category %r>' %self.name
+
 
 class Payee(db.Model):
     __tablename__ = 'payees'

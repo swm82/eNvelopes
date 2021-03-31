@@ -1,4 +1,4 @@
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash, jsonify
 from flask_login import login_user, logout_user, login_required 
 from . import auth
 from ..models import User, Category
@@ -17,8 +17,9 @@ def login():
             next = request.args.get('next') 
             if next is None or not next.startswith('/'):
                 next = url_for('main.index')
-            return redirect(next)
+            return jsonify({'next': next}), 200
         flash('Invalid username or password.')
+        return '', 401
     return render_template('auth/login.html', form=form)
 
 @auth.route('/logout')
@@ -28,6 +29,7 @@ def logout():
     flash('You have been logged out.')
     return redirect(url_for('main.index'))
 
+#TODO: handle duplicates
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
