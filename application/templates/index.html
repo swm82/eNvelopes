@@ -7,16 +7,14 @@
 
 
 {% block page_content %}
-<main class="container">
+<main class="container main-content">
   {% if current_user.is_authenticated %}
   <div class="row justify-content-center">
     <section class="card col-sm card text-center m-1 unbudgeted-card" id="budget-amount">
       <div class="card-body text-center">
-        <!-- <h1 class="card-title">Budget</h1> -->
         <h3 class="card-title">Unbudgeted Amount:</h3>
         <p>
           <button type="button" class="btn btn-primary amount-button unbudgeted-amount" id="unbudgeted-amount" data-toggle="modal" data-inflow="true" data-target="#add-transaction-modal"></button>
-
         </p>
       </div>
     </section>
@@ -72,9 +70,6 @@
                   <datalist id="payee-list">
                     <!-- Dynamically generated -->
                   </datalist>
-                <!-- <select class="form-control" id="payee-selector">
-                    <option value="" disabled selected>Payee</option>
-                </select> -->
               </div>
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               <button type="button" class="btn btn-primary" data-dismiss="modal" id="submit-transaction">Submit</button>
@@ -83,12 +78,7 @@
       </div>
     </div>
   </section>
-  <!-- TODO: handle move money -->
-  <!-- <form action="" method="post" class="form  move-cash" role="form">
-    {{ move_to_category_form.csrf_token() }}
-    {{ move_to_category_form.from_category_id() }}
-    {{ wtf.render_form(move_to_category_form) }}
-  </form> -->
+ 
   {% else %}
     <section class="container-fluid" id=>
       <h1>TODO: Redirect to register</h1>
@@ -97,236 +87,7 @@
   </main>
   {% endblock %}
 
-
 {% block scripts %}
   {{ super() }}
-  <script>
-    // TODO: Update unbudgeted amount on delete
-    // TODO: catch errors
-    // TODO: input validation
-
-    // Set enter functionality for input
-    // let inputs = document.getElementsByTagName('input')
-    // console.log(inputs)
-    // Array.from(inputs).forEach(input => input.addEventListener('keyup', e => {
-    //   let sib = input.nextSibling
-    //   while (sib) {
-    //     if (sib.matches('button')) break;
-    //   }
-    //   if (e.keyCode === 13) {
-    //     sib.click()
-    //   }
-    // }))
-
-    $('#add-cash-modal').on('show.bs.modal', function (event) {
-      var button = $(event.relatedTarget) // Button that triggered the modal
-      var category = button.data('category') // Extract info from data-* attributes
-      // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-      // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-      var modal = $(this)
-
-      modal.find('#modal-category').val(category)
-    })
-
-    // TODO: Ajax call to get list of payees
-    $('#add-transaction-modal').on('show.bs.modal', function (event) {
-      var button = $(event.relatedTarget) // Button that triggered the modal
-      var category = button.data('category') // Extract info from data-* attributes
-      console.log(button.data('inflow'))
-      // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-      // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-      var modal = $(this)
-      const title = modal.find('.modal-title').text('Add Income')
-      if (button.data('inflow')) {
-        title.text('Add Income')
-      } else {
-        title.text('Add Transaction')
-      }
-      modal.find('#transaction-category').val(category)
-    })
-
-    window.addEventListener('load', (e) => {
-      url = 'http://127.0.0.1:5000/api'
-      fetch(url)
-        .then(response=> response.json())
-        .then(data => {
-          data['categories'].forEach(item =>  {
-            if (item['name'] !== 'Inflow') addEnvelope(item)
-            else {
-              unbudgeted_amount = document.getElementById('unbudgeted-amount')
-              unbudgeted_amount.textContent = '$' + (item['amount']/100)
-              unbudgeted_amount.id = `${item['id']}-amount`
-              unbudgeted_amount.setAttribute('data-category', item['id'])
-              // TODO: add income modal
-            }
-          })
-          let payee_selector = document.getElementById('payee-list')
-          data['payees'].forEach(item => {
-            let choice = document.createElement('option')
-            choice.textContent = item['name']
-            payee_selector.appendChild(choice)
-          })
-        })
-    })
-
-    document.querySelector('#add-cash-button').addEventListener('click', e => {
-      const url = 'http://127.0.0.1:5000/api/add_to_category'
-      const button = e.target;
-      const category_id = button.nextElementSibling.value
-      const amount_input = document.querySelector('#add-cash-amount')
-      const amount = amount_input.value
-      amount_input.value = ''
-      const data = {'category_id': category_id, 'amount': amount}
-      fetch(url, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify(data)
-      })
-        .then(response => response.json())
-        .then(result =>  {
-          const category_amount = parseInt(result['category_amount']) / 100
-          const inflow_amount = parseInt(result['inflow_amount']) / 100
-          const inflow_card = document.querySelector('.unbudgeted-amount')
-          const card_to_update = document.getElementById(`${category_id}-amount`)
-          card_to_update.textContent = '$' + category_amount
-          card_to_update.style.transform = 'scale(1.7)'
-          inflow_card.textContent = '$' + inflow_amount
-          inflow_card.style.transform = 'scale(1.7)'
-          setTimeout(() => {
-            card_to_update.style.transform = 'scale(1.0)'
-            inflow_card.style.transform = 'scale(1.0)'
-          }, 200)
-        })
-    })
-
-    document.getElementById('submit-transaction').addEventListener('click', e => {
-      url = 'http://127.0.0.1:5000/api/add_transaction'
-      category_id = document.getElementById('transaction-category').value
-      amount_input = document.getElementById('transaction-amount')
-      amount = amount_input.value
-      amount_input.value = ''
-      payee = document.querySelector('#transaction-payee').value
-      data = {'category': category_id, 'amount': amount}
-      if (payee) {
-        data['payee_name'] = payee
-      }
-      fetch(url, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify(data)
-      })
-        .then(response => response.json())
-        .then(result =>  {
-          amount =  parseInt(result['category_amount']) / 100
-          category = result['category_id']
-          let card_to_update = document.getElementById(`${category}-amount`)
-          card_to_update.textContent = '$' + amount
-          card_to_update.style.transform = 'scale(1.7)'
-          setTimeout(() => card_to_update.style.transform = 'scale(1.0)', 200)
-        })
-    })
-
-
-    document.getElementById('add-category-button').addEventListener('click', e => {
-      url = 'http://127.0.0.1:5000/api/add_category'
-      name_field = document.getElementById('new-category-name')
-      b = { 'name': name_field.value }
-      fetch(url, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify(b)
-      })
-        .then(response => response.json())
-        .then(result =>  {
-          addEnvelope(result)
-        })
-          name_field.value = ""
-    })
-
-    function removeEnvelope(category) {
-      let card_to_delete = document.getElementById(`${category}-card`)
-      let container = card_to_delete.parentNode
-      url = 'http://127.0.0.1:5000/api/delete_category'
-      b = { 'id': category }
-      fetch(url, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify(b)
-      })
-        .then(response => response.json())
-        .then(result =>  {
-          unbudgeted_amount = document.querySelector('.unbudgeted-amount')
-          console.log(unbudgeted_amount)
-          unbudgeted_amount.textContent = '$' + (result['inflow_amount']/100)
-          container.removeChild(card_to_delete)
-        })
-
-    }
-
-    function addEnvelope(data) {
-      let name = data['name']
-      let amt = '$' + (parseInt(data['amount'])/100)
-      let id = data['id']
-      let container = document.querySelector('#envelopes')
-      let add_card = document.querySelector('#add-category-card')
-      const card = newElement('article','test2 card bg-light col-md-3 col-sm-6 m-2')
-      card.id = `${id}-card`
-      const action_buttons = newElement('div', 'd-flex justify-content-between')
-      const delete_button = newElement('button', 'btn btn-danger mt-3 mr-3 round-button')
-      delete_button.addEventListener('click', () => removeEnvelope(id))
-      delete_button.innerHTML = '<i class="far fa-trash-alt"></i>'
-      const add_transaction_button = newElement('button','btn btn-success mt-3 round-button')
-      addAttributes(add_transaction_button, {'data-toggle': 'modal', 'data-target': '#add-transaction-modal', 'data-category': id })
-      add_transaction_button.innerHTML = '<i class="fas fa-plus"></i>'
-      action_buttons.appendChild(delete_button)
-      action_buttons.appendChild(add_transaction_button)
-
-      const card_body = newElement('div', 'card-body text-center')
-      const card_title = newElement('h1', 'card-title')
-      addText(card_title, name)
-      const amount_button = newElement('button','btn btn-primary amount-button')
-      addAttributes(amount_button, {'data-toggle': 'modal', 'data-target': '#add-cash-modal', 'data-category': id })
-      amount_button.id = `${id}-amount`
-      addText(amount_button, amt)
-      card_body.appendChild(card_title)
-      card_body.appendChild(amount_button)
-      card.appendChild(action_buttons)
-      card.appendChild(card_body)
-      container.insertBefore(card, add_card)
-    }
-
-    const newElement = (tag, className) => {
-      const el = document.createElement(tag)
-      el.className = className
-      return el
-    }
-
-    const addAttributes = (el, attrs) => {
-      for (const attr in attrs) {
-        el.setAttribute(attr, attrs[attr])
-      }
-    }
-
-    const addText = (el, text) => {
-      const textNode = document.createTextNode(text)
-      el.appendChild(textNode)
-    }
-
-  </script>
-  
-
+  <script src="{{  url_for('static', filename='scripts/budget.js')  }}"></script>
 {% endblock %}
-
-

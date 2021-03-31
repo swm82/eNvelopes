@@ -13,6 +13,59 @@ body {
     min-height: calc(100vh - 140px);
 }
 
+.loader {
+    background-color: #4D774E;
+    width: 100%;
+    height: 100vh;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+}
+
+@keyframes rotating {
+    0% {
+      -ms-transform: rotate(0deg);
+      -moz-transform: rotate(0deg);
+      -webkit-transform: rotate(0deg);
+      -o-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    50% {
+      transform: rotate(360deg);
+    }
+    100% {
+      -ms-transform: rotate(360deg);
+      -moz-transform: rotate(360deg);
+      -webkit-transform: rotate(360deg);
+      -o-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+  }
+
+@keyframes shrink {
+    0% {
+        transform: scale(1.0);
+    }
+    100% {
+        transform: scale(0);
+    }
+}
+
+.loading-logo {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    transition: shrink ease-out;
+    -webkit-animation: rotating 2s linear infinite;
+    -moz-animation: rotating 2s linear infinite;
+    -ms-animation: rotating 2s linear infinite;
+    -o-animation: rotating 2s linear infinite;
+    animation: rotating 1s ease-in-out infinite;
+    animation-delay: .5s;
+}
+
 header {
     padding: 10px 30px;
     background-color: #4D774E;
@@ -58,6 +111,14 @@ header {
 
 .nav-item {
     font-size: 1.2em;
+}
+
+.nav-link {
+    transition: all .2s ease-in-out;
+}
+
+.nav-link:hover {
+    transform: translateY(-25%);
 }
 
 #logo span {
